@@ -1,0 +1,26 @@
+package plume;
+
+class Color
+{
+	public inline static var black:Int = 0xFF000000;
+	public inline static var white:Int = 0xFFFFFFFF;
+
+	// Pico8 colors
+	// http://www.romanzolotarev.com/pico-8-color-palette/
+
+	public inline static var p8DarkBlue:Int = 0xFF1D2B53;
+	public inline static var p8DarkPurple:Int = 0xFF7E2553;
+	public inline static var p8DarkGreen:Int = 0xFF008751;
+	public inline static var p8Brown:Int = 0xFFAB5236;
+	public inline static var p8DarkGray:Int = 0xFF5F574F;
+	public inline static var p8LightGray:Int = 0xFFC2C3C7;
+	public inline static var p8White:Int = 0xFFFFF1E8;
+	public inline static var p8Red:Int = 0xFFFF004D;
+	public inline static var p8Orange:Int = 0xFFFFA300;
+	public inline static var p8Yellow:Int = 0xFFFFEC27;
+	public inline static var p8Green:Int = 0xFF00E436;
+	public inline static var p8Blue:Int = 0xFF29ADFF;
+	public inline static var p8Indigo:Int = 0xFF83769C;
+	public inline static var p8Pink:Int = 0xFFFF77A8;
+	public inline static var p8Peach:Int = 0xFFFFCCAA;
+}
