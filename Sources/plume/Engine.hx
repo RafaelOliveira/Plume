@@ -7,6 +7,8 @@ import kha.Scaler;
 import kha.Assets;
 import kha.Image;
 import kha.graphics2.ImageScaleQuality;
+import kha.WindowOptions.Mode;
+import kha.WindowOptions.Position;
 import plume.input.Manager;
 
 @:structInit
@@ -18,6 +20,7 @@ class EngineOptions
 	@:optional public var bbWidth:Null<Int>;
 	@:optional public var bbHeight:Null<Int>;
 	@:optional public var highQualityScale:Null<Bool>;
+	@:optional public var fullscreen:Null<Bool>;
 }
 
 class Engine
@@ -47,9 +50,20 @@ class Engine
 		if (options.bbWidth != null && options.bbHeight != null)
 			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);		
 
-		System.init({ title: options.title, width: options.width, height: options.height }, function () {
-			Assets.loadEverything(assetsLoaded);
-		});
+		if (!options.fullscreen)
+		{
+			System.init({ title: options.title, width: options.width, height: options.height }, function () {
+				Assets.loadEverything(assetsLoaded);
+			});
+		}
+		else
+		{
+			System.initEx(options.title, 
+				[{ x: Position.Fixed(0), y: Position.Fixed(0), width: options.width, height: options.height, mode: Mode.Fullscreen }], 
+				function(_) {}, function() {
+					Assets.loadEverything(assetsLoaded);
+			});
+		}		
 	}
 
 	public static function enableInput(options:Int):Void
