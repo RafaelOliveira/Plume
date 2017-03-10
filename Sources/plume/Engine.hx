@@ -48,22 +48,32 @@ class Engine
 		inputs = new Array<Manager>();
 
 		if (options.bbWidth != null && options.bbHeight != null)
-			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);		
+			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
 
+		#if js
+		initWindowed(options);
+		#else
 		if (!options.fullscreen)
-		{
-			System.init({ title: options.title, width: options.width, height: options.height }, function () {
-				Assets.loadEverything(assetsLoaded);
-			});
-		}
+			initWindowed(options);
 		else
-		{
-			System.initEx(options.title, 
-				[{ x: Position.Fixed(0), y: Position.Fixed(0), width: options.width, height: options.height, mode: Mode.Fullscreen }], 
-				function(_) {}, function() {
-					Assets.loadEverything(assetsLoaded);
-			});
-		}		
+			initFullscreen(options);
+		#end
+	}
+
+	inline static function initWindowed(options:EngineOptions)
+	{
+		System.init({ title: options.title, width: options.width, height: options.height }, function () {
+			Assets.loadEverything(assetsLoaded);
+		});
+	}
+
+	inline static function initFullscreen(options:EngineOptions)
+	{
+		System.initEx(options.title,
+			[{ x: Position.Fixed(0), y: Position.Fixed(0), width: options.width, height: options.height, mode: Mode.Fullscreen }],
+			function(_) {}, function() {
+				Assets.loadEverything(assetsLoaded);
+		});
 	}
 
 	public static function enableInput(options:Int):Void
@@ -75,7 +85,7 @@ class Engine
 			inputs.push(plume.input.Mouse.get());
 
 		/*if (options & Manager.TOUCH == Manager.TOUCH)
-			inputs.push(new plume.input.Touch());	
+			inputs.push(new plume.input.Touch());
 
 		if (options & Manager.GAMEPAD == Manager.GAMEPAD)
 			inputs.push(plume.input.GamePad.getManager());*/
@@ -109,7 +119,7 @@ class Engine
 
 			for (input in inputs)
 				input.update();
-		}			
+		}
 	}
 
 	static function renderWithFramebuffer(framebuffer:Framebuffer):Void
@@ -137,6 +147,6 @@ class Engine
 
 			Scaler.scale(backbuffer, framebuffer, System.screenRotation);
 			framebuffer.g2.end();
-		}			
+		}
 	}
 }

@@ -11,5 +11,5 @@ class Swipe
 	{
 		this.start = start;
 		this.end = end;
-	}	
+	}
 }

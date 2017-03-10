@@ -1,6 +1,6 @@
 package plume.input;
 
-class Key 
+class Key
 {
     public inline static var ANY = -1;
 
@@ -55,7 +55,7 @@ class Key
 	public inline static var x = 120;
 	public inline static var y = 121;
 	public inline static var z = 122;*/
-	
+
 	public inline static var A = 65;
 	public inline static var B = 66;
 	public inline static var C = 67;
@@ -135,7 +135,7 @@ class Key
 	public static function nameOfKey(char:Int):String
 	{
 		if (char == -1) return "";
-		
+
 		if (char >= A && char <= Z) return String.fromCharCode(char);
 		if (char >= F1 && char <= F15) return "F" + Std.string(char - 111);
 		if (char >= 96 && char <= 105) return "NUMPAD " + Std.string(char - 96);
@@ -145,7 +145,7 @@ class Key
 			case UP:    return "UP";
 			case RIGHT: return "RIGHT";
 			case DOWN:  return "DOWN";
-			
+
 			case LEFT_SQUARE_BRACKET: return "{";
 			case RIGHT_SQUARE_BRACKET: return "}";
 			case TILDE: return "~";

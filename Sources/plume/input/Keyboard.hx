@@ -4,10 +4,10 @@ import kha.input.Keyboard as KhaKeyboard;
 import kha.Key as KhaKey;
 
 class Keyboard extends Manager
-{    
+{
 	var keysPressed:Map<Int, Bool>;
 	var keysDown:Map<Int, Bool>;
-	var keysUp:Map<Int, Bool>;	
+	var keysUp:Map<Int, Bool>;
 	var keyCount:Int = 0;
 	var keysJustPressed:Bool;
 
@@ -34,18 +34,18 @@ class Keyboard extends Manager
 	}
 
 	function onKeyDown(key:KhaKey, char:String):Void
-	{		
+	{
 		var code:Int = getCode(key);
-		
+
 		if(code == -1)
 			code = char.toUpperCase().charCodeAt(0);
-		
+
 		if (code == -1) // no key
-			return;		
-		
+			return;
+
 		keysPressed.set(code, true);
 		keysDown.set(code, true);
-		
+
 		keyCount++;
 		keysJustPressed = true;
 	}
@@ -53,17 +53,17 @@ class Keyboard extends Manager
 	function onUpKey(key:KhaKey, char:String):Void
 	{
 		var code:Int = getCode(key);
-		
+
 		if (code == -1)
 			code = char.toUpperCase().charCodeAt(0);
-		
+
 		if (code == -1) // no key
 			return;
 
 		keysUp.set(code, true);
 		keysDown.set(code, false);
-		
-		keyCount--;		
+
+		keyCount--;
 	}
 
 	override function update():Void
@@ -81,7 +81,7 @@ class Keyboard extends Manager
 	{
 		return keysDown.get(key);
 	}
-   
+
 	inline public function isUp(key:Int):Bool
 	{
 		return keysUp.exists(key);
@@ -104,7 +104,7 @@ class Keyboard extends Manager
 
 	private function getCode(k:KhaKey):Int
 	{
-		switch(k) 
+		switch(k)
 		{
 			case KhaKey.BACKSPACE:
 				return Key.BACKSPACE;
@@ -133,7 +133,7 @@ class Keyboard extends Manager
 			case KhaKey.CHAR:
 				return -1;
 		}
-		
+
 		return -1;
 	}
 }

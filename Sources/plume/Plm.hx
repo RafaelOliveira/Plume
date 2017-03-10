@@ -34,7 +34,7 @@ class Plm
 		}
 
 		gameScale = windowWidth / gameWidth;
-	}	
+	}
 
 	public static function addState(state:State, name:String, go:Bool = false):Void
 	{

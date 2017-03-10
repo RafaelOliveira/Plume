@@ -75,17 +75,17 @@ class Atlas
 				trace('(getRegions) region "$name" not found');
 		}
 
-		return listRegions;		
+		return listRegions;
 	}
 
 	public static function getRegionsByIndex(regionName:String, startIndex:Int, endIndex:Int):Array<Region>
 	{
 		var listRegionNames = new Array<String>();
 		endIndex++;
-		
+
 		for (i in startIndex...endIndex)
 			listRegionNames.push('$regionName-$i');
-			
+
 		return getRegions(listRegionNames);
 	}
 
@@ -97,24 +97,24 @@ class Atlas
 		{
 			case First(image):
 				reg = new Region(image, 0, 0, image.width, image.height);
-			
+
 			case Second(region):
 				reg = region;
 
 			case Third(regionName):
-				reg = Atlas.getRegion(regionName); 
+				reg = Atlas.getRegion(regionName);
 		}
 
 		var regions = new Array<Region>();
         var cols = Std.int(reg.w / regionWidth);
         var rows = Std.int(reg.h / regionHeight);
-        
+
         for (r in 0...rows)
         {
             for (c in 0...cols)
                 regions.push(new Region(reg.image, reg.sx + (c * regionWidth), reg.sy + (r * regionHeight), regionWidth, regionHeight));
         }
-        
+
         return regions;
 	}
 
@@ -126,12 +126,12 @@ class Atlas
 		{
 			case First(image):
 				regionSource = new Region(image, 0, 0, image.width, image.height);
-			
+
 			case Second(region):
 				regionSource = region;
 
 			case Third(regionName):
-				regionSource = Atlas.getRegion(regionName); 
+				regionSource = Atlas.getRegion(regionName);
 		}
 
 		return new Region(regionSource.image, regionSource.sx + sx, regionSource.sy + sy, w, h);
@@ -141,9 +141,9 @@ class Atlas
 	{
 		if (cache == null)
 			cache = new Map<String, Region>();
-		
+
 		cache.set('$name', region);
-	}    
+	}
 
 	public static function saveRegionList(regions:Array<Region>, baseName:String):Void
 	{
@@ -167,8 +167,8 @@ class Atlas
 		var blobString:String = xml.toString();
 		var fullXml:Xml = Xml.parse(blobString);
 		var firstNode:Xml = fullXml.firstElement(); // <TextureAtlas>
-		var data = new Fast(firstNode);		
-		
+		var data = new Fast(firstNode);
+
 		for (st in data.nodes.SubTexture)
 		{
 			var region = new Region(image, Std.parseInt(st.att.x), Std.parseInt(st.att.y), Std.parseInt(st.att.width), Std.parseInt(st.att.height));
@@ -177,17 +177,17 @@ class Atlas
 			cache.set(name, region);
 		}
 	}
-	
+
 	public static function loadAtlasTexturePacker(image:Image, xml:Blob):Void
 	{
 		if (cache == null)
 			cache = new Map<String, Region>();
 
-		var data:TexturePackerData = Json.parse(xml.toString());		
-		
+		var data:TexturePackerData = Json.parse(xml.toString());
+
 		for (item in data.frames)
 		{
-			var region = new Region(image, item.frame.x, item.frame.y, item.frame.w, item.frame.h);			
+			var region = new Region(image, item.frame.x, item.frame.y, item.frame.w, item.frame.h);
 			cache.set(item.filename, region);
 		}
 	}

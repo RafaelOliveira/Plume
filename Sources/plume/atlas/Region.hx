@@ -11,16 +11,16 @@ class Region
 
 	/** The x position inside the image */
 	public var sx:Float;
-	
+
 	/** The y position inside the image */
 	public var sy:Float;
-	
+
 	/** Width of the region */
 	public var w:Int;
-	
+
 	/** Height of the region */
 	public var h:Int;
-	
+
 	public function new(image:Image, sx:Float, sy:Float, w:Int, h:Int)
 	{
 		this.image = image;

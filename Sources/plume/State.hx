@@ -4,8 +4,8 @@ import kha.math.Vector2;
 import kha.graphics2.Graphics;
 
 class State
-{	
-	public var camera:Vector2;	
+{
+	public var camera:Vector2;
 
 	public function new():Void
 	{

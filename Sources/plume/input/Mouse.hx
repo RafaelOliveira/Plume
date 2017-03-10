@@ -5,13 +5,13 @@ import kha.math.Vector2;
 import plume.Plm;
 
 class Mouse extends Manager
-{	
+{
 	/** x not scaled */
 	public var rawX(default, null):Int = 0;
 
 	/** y not scaled */
-	public var rawY(default, null):Int = 0;	
-	
+	public var rawY(default, null):Int = 0;
+
 	/** x scaled to the backbuffer */
 	public var x(default, null):Int = 0;
 
@@ -21,14 +21,14 @@ class Mouse extends Manager
 	/** last x position when a mouse click started, scaled to the backbuffer */
 	public var sx(default, null):Int = 0;
 
-	/** last y position when a mouse click started, scaled to the backbuffer */	
+	/** last y position when a mouse click started, scaled to the backbuffer */
 	public var sy(default, null):Int = 0;
 
 	/** delta of x */
 	public var dx(default, null):Int = 0;
 
 	/** delta of y */
-	public var dy(default, null):Int = 0;	
+	public var dy(default, null):Int = 0;
 
 	/** x inside the world (adjusted with the camera) */
 	public var wx(default, null):Int = 0;
@@ -41,7 +41,7 @@ class Mouse extends Manager
 	var mouseDownStartTime:Float;
 
 	var mousePressed:Map<Int, Bool>;
-	var mouseHeld:Map<Int, Bool>;
+	var mouseDown:Map<Int, Bool>;
 	var mouseUp:Map<Int, Bool>;
 	var mouseCount:Int = 0;
 	var mouseJustPressed:Bool = false;
@@ -55,8 +55,8 @@ class Mouse extends Manager
 		kha.input.Mouse.get().notify(onMouseStart, onMouseEnd, onMouseMove, onMouseWheel);
 
 		mousePressed = new Map<Int, Bool>();
-		mouseHeld = new Map<Int, Bool>();
-		mouseUp = new Map<Int, Bool>();		
+		mouseDown = new Map<Int, Bool>();
+		mouseUp = new Map<Int, Bool>();
 	}
 
 	public static function get():Mouse
@@ -76,7 +76,7 @@ class Mouse extends Manager
 			mouseUp.remove(key);
 
 		mouseJustPressed = false;
-	}	
+	}
 
 	function onMouseStart(index:Int, x:Int, y:Int):Void
 	{
@@ -86,7 +86,7 @@ class Mouse extends Manager
 		sy = Std.int(y * Plm.gameScale);
 
 		mousePressed.set(index, true);
-		mouseHeld.set(index, true);
+		mouseDown.set(index, true);
 
 		mouseCount++;
 
@@ -100,7 +100,7 @@ class Mouse extends Manager
 		updateMouseData(x, y, 0, 0);
 
 		mouseUp.set(index, true);
-		mouseHeld.remove(index);
+		mouseDown.remove(index);
 
 		mouseCount--;
 
@@ -120,12 +120,12 @@ class Mouse extends Manager
 		this.y = Std.int(y / Plm.gameScale);
 		this.dx = Std.int(dx / Plm.gameScale);
 		this.dy = Std.int(dy / Plm.gameScale);
-		
+
 		if (Plm.state != null)
 		{
 			wx = Std.int((x + Plm.state.camera.x) / Plm.gameScale);
 			wy = Std.int((y + Plm.state.camera.y) / Plm.gameScale);
-		}		
+		}
 	}
 
 	function onMouseWheel(delta:Int):Void
@@ -139,9 +139,9 @@ class Mouse extends Manager
 		return mousePressed.exists(index);
 	}
 
-	inline public function isHeld(index:Int = 0):Bool
+	inline public function isDown(index:Int = 0):Bool
 	{
-		return mouseHeld.exists(index);
+		return mouseDown.exists(index);
 	}
 
 	inline public function isUp(index:Int = 0):Bool
@@ -149,7 +149,7 @@ class Mouse extends Manager
 		return mouseUp.exists(index);
 	}
 
-	inline public function isAnyHeld():Bool
+	inline public function isAnyDown():Bool
 	{
 		return mouseCount > 0;
 	}
@@ -161,12 +161,12 @@ class Mouse extends Manager
 
 	public function checkSwipe(distance:Int = 30, timeFrom:Float = 0.1, timeUntil:Float = 0.25):Swipe
 	{
-		var swipeOcurred = (isHeld() && Plm.distance(sx, sy, x, y) > distance
-			&& durationMouseDown > timeFrom && durationMouseDown < timeUntil);									
+		var swipeOcurred = (isDown() && Plm.distance(sx, sy, x, y) > distance
+			&& durationMouseDown > timeFrom && durationMouseDown < timeUntil);
 
 		if (swipeOcurred)
 			return new Swipe(new Vector2(sx, sy), new Vector2(x, y));
 		else
 			return null;
-	}	
+	}
 }
