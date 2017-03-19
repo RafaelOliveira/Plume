@@ -162,7 +162,7 @@ class Engine
 	public static function requestCanvasFullScreen():Void
 	{
 		kha.input.Mouse.get().notify(onMouseDownFullscreen, null, null, null, null);
-		//kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
+		kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
 	}
 
 	static function onMouseDownFullscreen(button:Int, x:Int, y:Int):Void
