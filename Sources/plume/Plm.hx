@@ -8,10 +8,16 @@ class Plm
 	static var stateList:Map<String, State>;
 
 	public static var state:State;
+	public static var dt(default, null):Float = 0;
 	public static var windowWidth(default, null):Int;
 	public static var windowHeight(default, null):Int;
 	public static var gameWidth(default, null):Int;
 	public static var gameHeight(default, null):Int;
+
+	private static var shakeTime:Float = 0;
+	private static var shakeMagnitude:Int = 0;
+	private static var shakeX:Int = 0;
+	private static var shakeY:Int = 0;
 
 	public static var gameScale(default, null):Float;
 
@@ -69,6 +75,9 @@ class Plm
 		}
 		
 		gameScale = windowWidth / gameWidth;
+
+		if (state != null)
+			state.windowSizeUpdated();
 	}
 
 	public static function addState(state:State, name:String, go:Bool = false):Void
@@ -211,5 +220,43 @@ class Plm
 	public inline static function scale(value:Float, min:Float, max:Float, min2:Float, max2:Float):Float
 	{
 		return min2 + ((value - min) / (max - min)) * (max2 - min2);
+	}
+
+	public static function shake(magnitude:Int, duration:Float)
+	{
+		if (shakeTime < duration) shakeTime = duration;
+		shakeMagnitude = magnitude;
+	}
+
+	/**
+	 * Stop the screen from shaking immediately.
+	 */
+	public static function shakeStop()
+	{
+		shakeTime = 0;
+	}
+		
+	private inline static function updateScreenShake():Void
+	{
+		if (shakeTime > 0)
+		{
+			var sx:Int = Std.random(shakeMagnitude * 2 + 1) - shakeMagnitude;
+			var sy:Int = Std.random(shakeMagnitude * 2 + 1) - shakeMagnitude;
+
+			state.camera.x += sx - shakeX;
+			state.camera.y += sy - shakeY;
+
+			shakeX = sx;
+			shakeY = sy;
+
+			shakeTime -= dt;
+			if (shakeTime < 0) shakeTime = 0;
+		}
+		else if (shakeX != 0 || shakeY != 0)
+		{
+			state.camera.x -= shakeX;
+			state.camera.y -= shakeY;
+			shakeX = shakeY = 0;
+		}
 	}
 }

@@ -14,5 +14,7 @@ class State
 
 	public function init():Void {}
 	public function update():Void {}
+	public function windowSizeUpdated():Void {}
+
 	public function render(g:Graphics):Void {}
 }

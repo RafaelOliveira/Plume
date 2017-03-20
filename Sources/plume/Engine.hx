@@ -34,6 +34,9 @@ class Engine
 	static var highQualityScale:Bool;
 	static var inputs:Array<Manager>;
 
+	static var currTime:Float = 0;
+	static var prevTime:Float = 0;
+
 	#if js
 	static var canvasUsingClientSize:Bool = false;
 	#end
@@ -57,6 +60,8 @@ class Engine
 
 		if (options.bbWidth != null && options.bbHeight != null)
 			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
+
+		currTime = Scheduler.time();
 
 		#if js
 		initWindowed(options);
@@ -133,6 +138,17 @@ class Engine
 		return size;
 	}
 
+	public static function requestFullScreen():Void
+	{
+		#if js
+		kha.input.Mouse.get().notify(onMouseDownFullscreen, null, null, null, null);
+		#else
+		kha.SystemImpl.requestFullscreen();
+		#end
+
+		kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
+	}
+
 	#if js
 	public static function setCanvasToClientSize(canvasName:String = 'khanvas'):Void
 	{		
@@ -157,12 +173,6 @@ class Engine
 		khanvas.style.height = Std.string(h);
 
 		canvasUsingClientSize = true;
-	}
-
-	public static function requestCanvasFullScreen():Void
-	{
-		kha.input.Mouse.get().notify(onMouseDownFullscreen, null, null, null, null);
-		kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
 	}
 
 	static function onMouseDownFullscreen(button:Int, x:Int, y:Int):Void
@@ -193,12 +203,18 @@ class Engine
 
 	static function update():Void
 	{
+		prevTime = currTime;
+		currTime = Scheduler.time();
+		Plm.dt = currTime - prevTime;
+
 		if (Plm.state != null)
 		{
 			Plm.state.update();
 
 			for (input in inputs)
 				input.update();
+
+			Plm.updateScreenShake();
 		}
 	}
 
