@@ -2,6 +2,12 @@ package plume;
 
 import kha.System;
 
+#if js
+import js.html.Window;
+import js.html.CanvasElement;
+import js.html.ImageElement;
+#end
+
 @:allow(plume.Engine)
 class Plm
 {
@@ -259,4 +265,45 @@ class Plm
 			shakeX = shakeY = 0;
 		}
 	}
+
+	#if js
+	public static function createScreenshot(mimeType:String = 'image/png'):Void
+	{		
+		var canvas = kha.SystemImpl.khanvas;
+
+		var screenshotCanvas:CanvasElement = cast js.Browser.document.createElement('canvas');
+		screenshotCanvas.width = canvas.width;
+		screenshotCanvas.height = canvas.height;
+
+		var renderContext = screenshotCanvas.getContext('2d');		
+		renderContext.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+
+		var base64Image = screenshotCanvas.toDataURL(mimeType);
+
+		var newWindow = js.Browser.window.open(null, '_blank');
+		
+		if (newWindow != null)
+		{
+			adjustScreenshotWindow(newWindow);
+
+			var img:ImageElement = cast newWindow.document.createElement('img');
+			img.src = base64Image;
+			newWindow.document.body.appendChild(img);
+		}
+		else
+			trace('It wasn\'t possible to create a new window for the screenshot');
+	}
+
+	static function adjustScreenshotWindow(window:Window):Void
+	{
+		window.document.body.style.margin = '0px';
+		window.document.body.style.padding = '0px';
+		window.document.body.style.height = '100%';
+		window.document.body.style.overflow = 'hidden';		
+		window.document.documentElement.style.margin = '0px';
+		window.document.documentElement.style.padding = '0px';
+		window.document.documentElement.style.height = '100%';
+		window.document.documentElement.style.overflow = 'hidden';
+	}
+	#end
 }

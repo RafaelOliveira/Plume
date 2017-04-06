@@ -8,7 +8,7 @@ import kha.Scaler;
 import kha.Assets;
 import kha.Image;
 import kha.graphics2.ImageScaleQuality;
-import kha.WindowOptions.Mode;
+import kha.WindowMode;
 import kha.WindowOptions.Position;
 import kha.math.Vector2i;
 import plume.input.Manager;
@@ -83,7 +83,7 @@ class Engine
 	inline static function initFullscreen(options:EngineOptions)
 	{
 		System.initEx(options.title,
-			[{ x: Position.Fixed(0), y: Position.Fixed(0), width: options.width, height: options.height, mode: Mode.Fullscreen, 
+			[{ x: Position.Fixed(0), y: Position.Fixed(0), width: options.width, height: options.height, mode: WindowMode.Fullscreen, 
 			rendererOptions: { samplesPerPixel: options.samplesPerPixel } }], 
 			function(_) {}, function() {
 				Assets.loadEverything(assetsLoaded);
@@ -137,7 +137,7 @@ class Engine
 
 		return size;
 	}
-
+	
 	public static function requestFullScreen():Void
 	{
 		#if js
@@ -146,7 +146,9 @@ class Engine
 		kha.SystemImpl.requestFullscreen();
 		#end
 
+		#if js
 		kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
+		#end
 	}
 
 	#if js
