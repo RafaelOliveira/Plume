@@ -141,17 +141,24 @@ class Engine
 	public static function requestFullScreen():Void
 	{
 		#if js
-		kha.input.Mouse.get().notify(onMouseDownFullscreen, null, null, null, null);
+		if (isJsMobile())
+			kha.SystemImpl.khanvas.ontouchstart = function() onMouseDownFullscreen(0, 0, 0);
+		else
+			kha.input.Mouse.get().notify(onMouseDownFullscreen, null, null, null, null);
+
+		kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
 		#else
 		kha.SystemImpl.requestFullscreen();
-		#end
-
-		#if js
-		kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
-		#end
+		#end		
 	}
 
 	#if js
+	static function onMouseDownFullscreen(button:Int, x:Int, y:Int):Void
+	{
+		if (!kha.SystemImpl.isFullscreen())		
+			kha.SystemImpl.requestFullscreen();		
+	}
+
 	public static function setCanvasToClientSize(canvasName:String = 'khanvas'):Void
 	{		
 		js.Browser.document.body.style.margin = '0px';
@@ -175,14 +182,31 @@ class Engine
 		khanvas.style.height = Std.string(h);
 
 		canvasUsingClientSize = true;
-	}
+	}	
 
-	static function onMouseDownFullscreen(button:Int, x:Int, y:Int):Void
+	public static function isJsMobile():Bool
 	{
-		if (!kha.SystemImpl.isFullscreen())		
-			kha.SystemImpl.requestFullscreen();		
+		var mobile = ['iphone', 'ipad', 'android', 'blackberry', 'nokia', 'opera mini', 'windows mobile', 'windows phone', 'iemobile'];
+		for (i in 0...mobile.length)
+		{
+			if (js.Browser.navigator.userAgent.toLowerCase().indexOf(mobile[i].toLowerCase()) > 0)
+				return true;
+		}
+
+		return false;
 	}
 	#end
+
+	public static function isMobile():Bool
+	{
+		#if js
+		return isJsMobile();
+		#else if (sys_android || sys_android_native || sys_ios)
+		return true;		
+		#end
+
+		return false;
+	}
 
 	static function assetsLoaded():Void
 	{
