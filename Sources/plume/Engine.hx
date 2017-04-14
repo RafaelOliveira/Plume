@@ -201,7 +201,7 @@ class Engine
 	{
 		#if js
 		return isJsMobile();
-		#else if (sys_android || sys_android_native || sys_ios)
+		#elseif (sys_android || sys_android_native || sys_ios)
 		return true;		
 		#end
 
