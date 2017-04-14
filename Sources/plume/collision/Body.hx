@@ -35,7 +35,7 @@ class Body
 	{
 		if (collidable && body.collidable)
 		{
-			if (rect.collisionProjected(x, y, body.rect, body.pos.x, body.pos.y))
+			if (collideRect(x, y, body.pos.x + body.rect.x, body.pos.y + body.rect.y, body.rect.width, body.rect.height))
 			{
 				if (type == Body.HITBOX && body.type == Body.HITBOX)
 						return body;
@@ -62,15 +62,16 @@ class Body
 		if (!collidable)
 			return null;
 
-		for (e in list)
+		for (body in list)
 		{
-			if (e.collidable && e != this && rect.collisionProjected(x, y, e.rect, e.pos.x, e.pos.y))
+			if (body.collidable && body != this && collideRect(x, y, body.pos.x + body.rect.x, body.pos.y + body.rect.y, 
+				body.rect.width, body.rect.height))
 			{
-				if (type == Body.HITBOX && e.type == Body.HITBOX)
-					return e;
-				else (type == Body.HITBOX && e.type == Body.GRID)
+				if (type == Body.HITBOX && body.type == Body.HITBOX)
+					return body;
+				else (type == Body.HITBOX && body.type == Body.GRID)
 				{
-					var grid:Grid = cast e;					
+					var grid:Grid = cast body;
 					return grid.collideBody(this, x, y);
 				}
 			}
