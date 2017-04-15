@@ -20,7 +20,7 @@ class Tilemap
 	/** Height in pixels **/
 	public var height(default, null):Int;
 
-	public var map:Array<Array<Int>>;
+	public var data:Array<Array<Int>>;
 
 	// temp variables
 	var _x:Float;
@@ -40,15 +40,20 @@ class Tilemap
 		if (!checkValidTile(x, y)) 
 			return;
 
-		map[y][x] = value;		
+		data[y][x] = value;		
 	}
 	
 	public function getTile(x:Int, y:Int):Int
 	{
 		if (checkValidTile(x, y))
-			return map[y][x];
+			return data[y][x];
 		else
 			return -1;
+	}
+
+	public function clearTile(x:Int, y:Int):Void
+	{
+		setTile(x, y, -1);
 	}
 
 	inline function checkValidTile(x:Int, y:Int):Bool
@@ -69,7 +74,7 @@ class Tilemap
 
 	public function loadEmpty(columns:Int, rows:Int):Void
 	{
-		map = new Array<Array<Int>>();
+		data = new Array<Array<Int>>();
 
 		this.rows = rows;
 		this.columns = columns;
@@ -79,10 +84,10 @@ class Tilemap
 		
 		for (y in 0...rows)
 		{
-			map.push(new Array<Int>());
+			data.push(new Array<Int>());
 			
 			for (x in 0...columns)			
-				map[y].push(-1);
+				data[y].push(-1);
 		}
 	}
 
@@ -94,18 +99,18 @@ class Tilemap
 	 */
 	public function loadFrom2DArray(array:Array<Array<Int>>):Void
 	{
-		map = new Array<Array<Int>>();
+		data = new Array<Array<Int>>();
 		
 		for (y in 0...array.length)
 		{
-			map.push(new Array<Int>());
+			data.push(new Array<Int>());
 			
 			for (x in 0...array[y].length)			
-				map[y].push(array[y][x]);			
+				data[y].push(array[y][x]);			
 		}
 		
-		rows = map.length;
-		columns = map[0].length;
+		rows = data.length;
+		columns = data[0].length;
 		
 		height = rows * tileHeight;
 		width = columns * tileWidth;
@@ -120,7 +125,7 @@ class Tilemap
 	*/
 	public function loadFromString(str:String, columnSep:String = ",", rowSep:String = "\n"):Void
 	{
-		map = new Array<Array<Int>>();
+		data = new Array<Array<Int>>();
 		
 		var row:Array<String> = str.split(rowSep);
 		var	rows:Int = row.length;
@@ -129,7 +134,7 @@ class Tilemap
 			
 		for (y in 0...rows)
 		{
-			map.push(new Array<Int>());
+			data.push(new Array<Int>());
 			
 			if (row[y] == '') 
 				continue;
@@ -140,12 +145,12 @@ class Tilemap
 			for (x in 0...cols)
 			{
 				if (col[x] != '')		
-					map[y].push(Std.parseInt(col[x]));
+					data[y].push(Std.parseInt(col[x]));
 			}
 		}
 		
-		rows = map.length;
-		columns = map[0].length;
+		rows = data.length;
+		columns = data[0].length;
 		
 		height = rows * tileHeight;
 		width = columns * tileWidth;
@@ -210,12 +215,12 @@ class Tilemap
 
 	public function render(g:Graphics, x:Float, y:Float):Void
 	{
-		for (my in 0...map.length)
+		for (my in 0...data.length)
 		{
-			for (mx in 0...map[my].length)
+			for (mx in 0...data[my].length)
 			{
-				if (map[my][mx] != -1)				
-					tileset.render(g, map[my][mx], x + (mx * tileWidth), y + (my * tileHeight));
+				if (data[my][mx] != -1)				
+					tileset.render(g, data[my][mx], x + (mx * tileWidth), y + (my * tileHeight));
 			}
 		}
 	}
@@ -241,7 +246,7 @@ class Tilemap
 		{
 			for (c in _startCol...(_endCol))
 			{
-				var tile = map[r][c];
+				var tile = data[r][c];
 				if (tile != -1)
 				{
 					_x = x + (c * tileWidth) - cameraX;

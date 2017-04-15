@@ -1,5 +1,6 @@
 package plume;
 
+import kha.math.Vector2;
 import kha.System;
 
 #if js
@@ -14,6 +15,8 @@ class Plm
 	static var stateList:Map<String, State>;
 
 	public static var state:State;
+	public static var camera(get, null):Vector2;
+
 	public static var dt(default, null):Float = 0;
 	public static var windowWidth(default, null):Int;
 	public static var windowHeight(default, null):Int;
@@ -306,4 +309,9 @@ class Plm
 		window.document.documentElement.style.overflow = 'hidden';
 	}
 	#end
+
+	inline static function get_camera():Vector2
+	{
+		return state.camera;
+	}
 }

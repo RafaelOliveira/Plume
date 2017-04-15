@@ -61,6 +61,9 @@ class Engine
 		if (options.bbWidth != null && options.bbHeight != null)
 			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
 
+		if (options.samplesPerPixel == null) 
+			options.samplesPerPixel = 1;
+
 		currTime = Scheduler.time();
 
 		#if js
