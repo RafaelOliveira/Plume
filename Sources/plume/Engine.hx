@@ -28,14 +28,16 @@ class EngineOptions
 
 @:allow(plume.Plm)
 class Engine
-{
-	static var callback:Void->Void;
+{	
 	static var backbuffer:Image;
 	static var highQualityScale:Bool;
 	static var inputs:Array<Manager>;
 
 	static var currTime:Float = 0;
 	static var prevTime:Float = 0;
+
+	static var _callback:Void->Void;
+	static var _bbSize:Vector2i;
 
 	#if js
 	static var canvasUsingClientSize:Bool = false;
@@ -52,19 +54,17 @@ class Engine
 		if (options.height == null)
 			options.width = 600;
 
-		highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;
+		highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;		
 
-		Engine.callback = callback;
+		Engine._callback = callback;
 
 		inputs = new Array<Manager>();
 
-		if (options.bbWidth != null && options.bbHeight != null)
-			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
+		if (options.bbWidth != null && options.bbHeight != null)			
+			_bbSize = new Vector2i(options.bbWidth, options.bbHeight);
 
 		if (options.samplesPerPixel == null) 
-			options.samplesPerPixel = 1;
-
-		currTime = Scheduler.time();
+			options.samplesPerPixel = 1;		
 
 		#if js
 		initWindowed(options);
@@ -162,6 +162,19 @@ class Engine
 			kha.SystemImpl.requestFullscreen();		
 	}
 
+	/*static function setCanvasScaleQuality(value:Bool):Void
+	{
+		var canvas:Dynamic = kha.SystemImpl.khanvas;
+
+		if (canvas != null)
+		{
+			canvas.mozImageSmoothingEnabled = value;
+			canvas.webkitImageSmoothingEnabled = value;
+			canvas.msImageSmoothingEnabled = value;
+			canvas.imageSmoothingEnabled = value;
+		}
+	}*/
+
 	public static function setCanvasToClientSize(canvasName:String = 'khanvas'):Void
 	{		
 		js.Browser.document.body.style.margin = '0px';
@@ -213,8 +226,17 @@ class Engine
 
 	static function assetsLoaded():Void
 	{
-		if (backbuffer != null)
+		//#if js
+		//setCanvasScaleQuality(highQualityScale);
+		//#end
+
+		currTime = Scheduler.time();
+
+		if (_bbSize != null)
 		{
+			backbuffer = Image.createRenderTarget(_bbSize.x, _bbSize.y);
+			_bbSize = null;
+
 			Plm.init(true, backbuffer.width, backbuffer.height);
 			System.notifyOnRender(renderWithBackbuffer);
 		}
@@ -226,8 +248,8 @@ class Engine
 
 		Scheduler.addTimeTask(update, 0, 1 / 60);
 
-		callback();
-		callback = null;
+		_callback();
+		_callback = null;
 	}
 
 	static function update():Void
@@ -266,9 +288,13 @@ class Engine
 			backbuffer.g2.end();
 
 			framebuffer.g2.begin();
-
+			
 			if (highQualityScale)
 				framebuffer.g2.imageScaleQuality = ImageScaleQuality.High;
+			#if js
+			else
+				framebuffer.g2.imageScaleQuality = ImageScaleQuality.Low;
+			#end
 
 			Scaler.scale(backbuffer, framebuffer, System.screenRotation);
 			framebuffer.g2.end();

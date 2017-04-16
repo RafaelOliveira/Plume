@@ -164,7 +164,7 @@ class Grid extends Body
 			data.push(new Array<Tile>());
 
 			for (x in 0...array[y].length)
-				data[y].push(new Tile(array[y][x] > 0));				
+				data[y].push(new Tile(array[y][x] > 0));
 		}
 
 		rows = data.length;
@@ -172,9 +172,26 @@ class Grid extends Body
 		rect = new Rectangle(0, 0, columns * tileWidth, rows * tileHeight);
 	}
 
-	public funciton loadFromTilemap(tilemap:Tilemap):Void
+	public function loadFromTilemap(tilemap:Tilemap, solidTiles:Array<Int>):Void
 	{
-		loadFrom2DArray(tilemap.map);
+		data = new Array<Array<Tile>>();
+
+		for (y in 0...tilemap.data.length)
+		{
+			data.push(new Array<Tile>());
+
+			for (x in 0...tilemap.data[y].length)
+			{
+				if (solidTiles.indexOf(tilemap.data[y][x]) > -1)
+					data[y].push(new Tile(true));
+				else
+					data[y].push(new Tile(false));
+			}
+		}
+
+		rows = data.length;
+		columns = data[0].length;
+		rect = new Rectangle(0, 0, columns * tileWidth, rows * tileHeight);
 	}
 
 	override public function collideBody(body:Body, x:Float, y:Float):Body
@@ -209,5 +226,173 @@ class Grid extends Body
 		}
 
 		return null;
+	}
+
+	/**
+	 * Shoots a ray from the start point to the end point.
+	 * If/when it passes through a tile, it stores that point and returns false.
+	 * 
+	 * @param	Start		The world coordinates of the start of the ray.
+	 * @param	End			The world coordinates of the end of the ray.
+	 * @param	Result		An optional point containing the first wall impact if there was one. Null otherwise.
+	 * @param	Resolution	Defaults to 1, meaning check every tile or so.  Higher means more checks!
+	 * @return	Returns true if the ray made it from Start to End without hitting anything. Returns false and fills Result if a tile was hit.
+	 */
+	public function ray(start:Vector2, end:Vector2, ?result:Vector2, resolution:Float = 1):Bool
+	{
+        var tWidth = tileWidth;
+        var tHeight = tileHeight;
+
+		var width = columns * tileWidth;
+		var height = rows * tileHeight;
+        
+		var step:Float = tWidth;
+		
+		if (tHeight < tWidth)
+			step = tHeight;
+		
+		step /= resolution;
+		var deltaX:Float = end.x - start.x;
+		var deltaY:Float = end.y - start.y;
+		var distance:Float = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		var steps:Int = Math.ceil(distance / step);
+		var stepX:Float = deltaX / steps;
+		var stepY:Float = deltaY / steps;
+		var curX:Float = start.x - stepX;
+		var curY:Float = start.y - stepY;
+		var tileX:Int;
+		var tileY:Int;
+		var i:Int = 0;
+                		
+		while (i < steps)
+		{
+			curX += stepX;
+			curY += stepY;
+			
+			if ((curX < 0) || (curX > width) || (curY < 0) || (curY > height))
+			{
+				i++;
+				continue;
+			}
+			
+			tileX = Math.floor(curX / tWidth);
+			tileY = Math.floor(curY / tHeight);
+			
+			if (data[tileY][tileX].solid)
+			{
+				// Some basic helper stuff
+				tileX *= Std.int(tWidth);
+				tileY *= Std.int(tHeight);
+				var rx:Float = 0;
+				var ry:Float = 0;
+				var q:Float;
+				var lx:Float = curX - stepX;
+				var ly:Float = curY - stepY;
+				
+				// Figure out if it crosses the X boundary
+				q = tileX;
+				
+				if (deltaX < 0)				
+					q += tWidth;				
+				
+				rx = q;
+				ry = ly + stepY * ((q - lx) / stepX);
+				
+				if ((ry >= tileY) && (ry <= tileY + tHeight))
+				{
+					if (result == null)					
+						result = new Vector2();					
+					
+					result.x = rx; 
+                    result.y = ry;
+                    
+					return false;
+				}
+				
+				// Else, figure out if it crosses the Y boundary
+				q = tileY;
+				
+				if (deltaY < 0)				
+					q += tHeight;				
+				
+				rx = lx + stepX * ((q - ly) / stepY);
+				ry = q;
+				
+				if ((rx >= tileX) && (rx <= tileX + tWidth))
+				{
+					if (result == null)					
+						result = new Vector2();					
+					
+					result.x = rx;
+                    result.y = ry;
+                    
+					return false;
+				}
+				
+				return true;
+			}
+			i++;
+		}
+		
+		return true;
+	}
+
+	/**
+	* Saves the grid data to a string.
+	* @param	columnSep	The string that separates each tile value on a row, default is ",".
+	* @param	rowSep		The string that separates each row of tiles, default is "\n".
+	*
+	* @return The string version of the grid.
+	*/
+	public function saveToString(columnSep:String = ',', rowSep:String = '\n',
+		solid:String = 'true', empty:String = 'false'): String
+	{
+		var s:String = '',
+			x:Int, y:Int;
+
+		for (y in 0...rows)
+		{
+			for (x in 0...columns)
+			{
+				s += Std.string(getTile(x, y) ? solid : empty);
+
+				if (x != columns - 1) 
+					s += columnSep;
+			}
+
+			if (y != rows - 1) 
+				s += rowSep;
+		}
+
+		return s;
+	}
+
+	public function printToConsole(showBlankLines:Bool = false):Void
+	{
+		var line:String;
+
+		for (y in 0...rows)
+		{
+			line = (y % 2 == 0 ? '[' : ']');
+
+			for (x in 0...columns)
+			{
+				if (data[y][x].solid)
+					line += '#';
+				else
+					line += ' ';
+			}
+
+			line = StringTools.rtrim(line);
+
+			if (line.length > 1 || (line.length == 1 && showBlankLines))
+			{
+				#if js
+				js.Browser.console.log(line);
+				#else
+				trace(line); // TODO: put the right command to print in the console in cpp
+				#end
+			}
+		}
 	}
 }

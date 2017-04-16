@@ -15,7 +15,7 @@ class Plm
 	static var stateList:Map<String, State>;
 
 	public static var state:State;
-	public static var camera(get, null):Vector2;
+	public static var camera(get, null):Camera;
 
 	public static var dt(default, null):Float = 0;
 	public static var windowWidth(default, null):Int;
@@ -310,7 +310,7 @@ class Plm
 	}
 	#end
 
-	inline static function get_camera():Vector2
+	inline static function get_camera():Camera
 	{
 		return state.camera;
 	}

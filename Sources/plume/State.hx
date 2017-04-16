@@ -1,15 +1,14 @@
 package plume;
 
-import kha.math.Vector2;
 import kha.graphics2.Graphics;
 
 class State
 {
-	public var camera:Vector2;
+	public var camera:Camera;
 
 	public function new():Void
 	{
-		camera = new Vector2();
+		camera = new Camera();
 	}
 
 	public function init():Void {}

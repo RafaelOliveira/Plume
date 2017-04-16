@@ -38,8 +38,8 @@ class Body
 			if (collideRect(x, y, body.pos.x + body.rect.x, body.pos.y + body.rect.y, body.rect.width, body.rect.height))
 			{
 				if (type == Body.HITBOX && body.type == Body.HITBOX)
-						return body;
-				else (type == Body.HITBOX && body.type == Body.GRID)
+					return body;
+				else if (type == Body.HITBOX && body.type == Body.GRID)
 				{
 					var grid:Grid = cast body;
 					return grid.collideBody(this, x, y);
@@ -69,7 +69,7 @@ class Body
 			{
 				if (type == Body.HITBOX && body.type == Body.HITBOX)
 					return body;
-				else (type == Body.HITBOX && body.type == Body.GRID)
+				else if (type == Body.HITBOX && body.type == Body.GRID)
 				{
 					var grid:Grid = cast body;
 					return grid.collideBody(this, x, y);

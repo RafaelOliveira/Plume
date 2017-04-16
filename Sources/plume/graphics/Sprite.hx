@@ -60,16 +60,16 @@ class Sprite
 		scaleX = 1;
 		scaleY = 1;
 		
-		flip = new Vector2b();				
+		flip = new Vector2b();
 	}
 	
 	function render(g:Graphics, x:Float, y:Float, cameraX:Float, cameraY:Float):Void 
-	{			
+	{
 		g.drawScaledSubImage(region.image, region.sx, region.sy, region.w, region.h,
 			x + (flip.x ? widthScaled : 0) - cameraX,
 			y + (flip.y ? heightScaled : 0) - cameraY, 
-			flip.x ? -widthScaled : widthScaled, flip.y ? -heightScaled : heightScaled);				
-	}    
+			flip.x ? -widthScaled : widthScaled, flip.y ? -heightScaled : heightScaled);
+	}
 	
 	public function setScale(value:Float):Void
 	{
