@@ -1,99 +1,113 @@
 package plume;
-
 import kha.System;
-import kha.Display;
 import kha.Framebuffer;
 import kha.Scheduler;
 import kha.Scaler;
-import kha.Assets;
 import kha.Image;
 import kha.graphics2.ImageScaleQuality;
-import kha.WindowMode;
-import kha.WindowOptions.Position;
 import kha.math.Vector2i;
 import plume.input.Manager;
 
 @:structInit
 class EngineOptions
-{
-	@:optional public var title:String;
-	@:optional public var width:Null<Int>;
-	@:optional public var height:Null<Int>;
+{	
 	@:optional public var bbWidth:Null<Int>;
 	@:optional public var bbHeight:Null<Int>;
-	@:optional public var highQualityScale:Null<Bool>;
-	@:optional public var fullscreen:Null<Bool>;
-	@:optional public var samplesPerPixel:Null<Int>;
+	@:optional public var highQualityScale:Null<Bool>;	
 }
 
 @:allow(plume.Plm)
 class Engine
 {	
-	static var backbuffer:Image;
-	static var highQualityScale:Bool;
-	static var inputs:Array<Manager>;
+	var backbuffer:Image;
+	var highQualityScale:Bool;
+	var inputs:Array<Manager>;
 
-	static var currTime:Float = 0;
-	static var prevTime:Float = 0;
-
-	static var _callback:Void->Void;
-	static var _bbSize:Vector2i;
+	var currTime:Float = 0;
+	var prevTime:Float = 0;	
 
 	#if js
-	static var canvasUsingClientSize:Bool = false;
+	var canvasUsingClientSize:Bool = false;
 	#end
 
-	public static function init(options:EngineOptions, callback:Void->Void):Void
+	static var instance:Engine;
+
+	public function new(options:EngineOptions):Void
 	{
-		if (options.title == null)
-			options.title = 'Project';
+		instance = this;		
 
-		if (options.width == null)
-			options.width = 800;
-
-		if (options.height == null)
-			options.width = 600;
-
-		highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;		
-
-		Engine._callback = callback;
+		highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;				
 
 		inputs = new Array<Manager>();
 
-		if (options.bbWidth != null && options.bbHeight != null)			
-			_bbSize = new Vector2i(options.bbWidth, options.bbHeight);
+		currTime = Scheduler.time();
 
-		if (options.samplesPerPixel == null) 
-			options.samplesPerPixel = 1;		
+		if (options.bbWidth != null && options.bbHeight != null)
+		{
+			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
 
-		#if js
-		initWindowed(options);
-		#else
-		if (!options.fullscreen)
-			initWindowed(options);
+			Plm.init(true, backbuffer.width, backbuffer.height);
+			System.notifyOnRender(renderWithBackbuffer);
+		}
 		else
-			initFullscreen(options);
-		#end
+		{
+			Plm.init(false, 0, 0);
+			System.notifyOnRender(renderWithFramebuffer);
+		}
+
+		Scheduler.addTimeTask(update, 0, 1 / 60);		
 	}
 
-	inline static function initWindowed(options:EngineOptions)
+	public function update():Void
 	{
-		System.init({ title: options.title, width: options.width, height: options.height, samplesPerPixel: options.samplesPerPixel }, function () {
-			Assets.loadEverything(assetsLoaded);
-		});
+		prevTime = currTime;
+		currTime = Scheduler.time();
+		Plm.dt = currTime - prevTime;
+
+		if (Plm.state != null)
+		{
+			Plm.state.update();
+
+			for (input in inputs)
+				input.update();
+
+			Plm.updateScreenShake();
+		}
 	}
 
-	inline static function initFullscreen(options:EngineOptions)
+	function renderWithFramebuffer(framebuffer:Framebuffer):Void
 	{
-		System.initEx(options.title,
-			[{ x: Position.Fixed(0), y: Position.Fixed(0), width: options.width, height: options.height, mode: WindowMode.Fullscreen, 
-			rendererOptions: { samplesPerPixel: options.samplesPerPixel } }], 
-			function(_) {}, function() {
-				Assets.loadEverything(assetsLoaded);
-		});
+		if (Plm.state != null)
+		{
+			framebuffer.g2.begin(false);
+			Plm.state.render(framebuffer.g2);
+			framebuffer.g2.end();
+		}
 	}
 
-	public static function enableInput(options:Int):Void
+	function renderWithBackbuffer(framebuffer:Framebuffer):Void
+	{
+		if (Plm.state != null)
+		{
+			backbuffer.g2.begin(false);
+			Plm.state.render(backbuffer.g2);
+			backbuffer.g2.end();
+
+			framebuffer.g2.begin();
+			
+			if (highQualityScale)
+				framebuffer.g2.imageScaleQuality = ImageScaleQuality.High;
+			#if js
+			else
+				framebuffer.g2.imageScaleQuality = ImageScaleQuality.Low;
+			#end
+
+			Scaler.scale(backbuffer, framebuffer, System.screenRotation);
+			framebuffer.g2.end();
+		}
+	}
+
+	public function enableInput(options:Int):Void
 	{
 		if (options & Manager.KEYBOARD == Manager.KEYBOARD)
 			inputs.push(plume.input.Keyboard.get());
@@ -197,7 +211,7 @@ class Engine
 		khanvas.style.width = Std.string(w);
 		khanvas.style.height = Std.string(h);
 
-		canvasUsingClientSize = true;
+		Engine.instance.canvasUsingClientSize = true;
 	}	
 
 	public static function isJsMobile():Bool
@@ -222,82 +236,5 @@ class Engine
 		#end
 
 		return false;
-	}
-
-	static function assetsLoaded():Void
-	{
-		//#if js
-		//setCanvasScaleQuality(highQualityScale);
-		//#end
-
-		currTime = Scheduler.time();
-
-		if (_bbSize != null)
-		{
-			backbuffer = Image.createRenderTarget(_bbSize.x, _bbSize.y);
-			_bbSize = null;
-
-			Plm.init(true, backbuffer.width, backbuffer.height);
-			System.notifyOnRender(renderWithBackbuffer);
-		}
-		else
-		{
-			Plm.init(false, 0, 0);
-			System.notifyOnRender(renderWithFramebuffer);
-		}
-
-		Scheduler.addTimeTask(update, 0, 1 / 60);
-
-		_callback();
-		_callback = null;
-	}
-
-	static function update():Void
-	{
-		prevTime = currTime;
-		currTime = Scheduler.time();
-		Plm.dt = currTime - prevTime;
-
-		if (Plm.state != null)
-		{
-			Plm.state.update();
-
-			for (input in inputs)
-				input.update();
-
-			Plm.updateScreenShake();
-		}
-	}
-
-	static function renderWithFramebuffer(framebuffer:Framebuffer):Void
-	{
-		if (Plm.state != null)
-		{
-			framebuffer.g2.begin(false);
-			Plm.state.render(framebuffer.g2);
-			framebuffer.g2.end();
-		}
-	}
-
-	static function renderWithBackbuffer(framebuffer:Framebuffer):Void
-	{
-		if (Plm.state != null)
-		{
-			backbuffer.g2.begin(false);
-			Plm.state.render(backbuffer.g2);
-			backbuffer.g2.end();
-
-			framebuffer.g2.begin();
-			
-			if (highQualityScale)
-				framebuffer.g2.imageScaleQuality = ImageScaleQuality.High;
-			#if js
-			else
-				framebuffer.g2.imageScaleQuality = ImageScaleQuality.Low;
-			#end
-
-			Scaler.scale(backbuffer, framebuffer, System.screenRotation);
-			framebuffer.g2.end();
-		}
 	}
 }

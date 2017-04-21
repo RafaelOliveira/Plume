@@ -54,7 +54,7 @@ class Plm
 	static function updateWindowSize():Void
 	{
 		#if js
-		if (Engine.canvasUsingClientSize)
+		if (Engine.instance.canvasUsingClientSize)
 		{
 			windowWidth = js.Browser.window.innerWidth;
 			windowHeight = js.Browser.window.innerHeight;
@@ -77,7 +77,7 @@ class Plm
 		windowHeight = System.windowHeight();
 		#end
 
-		if (Engine.backbuffer == null)
+		if (Engine.instance.backbuffer == null)
 		{
 			gameWidth = windowWidth;
 			gameHeight = windowHeight;

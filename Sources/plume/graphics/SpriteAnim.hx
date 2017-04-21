@@ -12,12 +12,14 @@ class AnimData
 	public var name:String;	
 	public var regions:Array<Region>;
 	public var fps:Int;
+	public var onCompleteFunc:Void->Void;
 	
-	public function new(name:String, regions:Array<Region>, fps:Int):Void
+	public function new(name:String, regions:Array<Region>, fps:Int, ?onCompleteFunc:Void->Void):Void
 	{
 		this.name = name;
 		this.regions = regions;
 		this.fps = fps;
+		this.onCompleteFunc = onCompleteFunc;
 	}
 }
 
@@ -54,7 +56,7 @@ class SpriteAnim
 	
 	public function new():Void
 	{
-		active = true;	
+		active = false;	
 		direction = 1;
 		currIndex = 0;
 		loop = false;
@@ -82,6 +84,9 @@ class SpriteAnim
 
 			if (currIndex >= currAnimation.regions.length)
 			{
+				if (currAnimation.onCompleteFunc != null)
+					currAnimation.onCompleteFunc();
+
 				if (!loop)
 				{
 					stop();
@@ -98,6 +103,9 @@ class SpriteAnim
 			}					
 			else if (currIndex < 0)
 			{
+				if (currAnimation.onCompleteFunc != null)
+					currAnimation.onCompleteFunc();
+					
 				if (!loop)
 				{
 					stop();
@@ -124,12 +132,12 @@ class SpriteAnim
 		animations = null;
 	}
 	
-	public function addAnimation(name:String, regions:Array<Region>, fps:Int = 12):Void
+	public function addAnimation(name:String, regions:Array<Region>, fps:Int = 12, ?onCompleteFunc:Void->Void):Void
 	{
 		if (animations.exists(name))
 			trace('animation $name already exists, overwriting...');
 
-		animations.set(name, new AnimData(name, regions, fps));		
+		animations.set(name, new AnimData(name, regions, fps, onCompleteFunc));
 	}
 	
 	public function removeAnimation(name:String):Void
