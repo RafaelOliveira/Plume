@@ -49,6 +49,11 @@ class Atlas
 {
 	static var cache:Map<String, Region>;
 
+	public static function exist():Bool
+	{
+		return (cache != null);
+	}
+
 	public static function getRegion(regionName:String):Region
 	{
 		var region = cache.get(regionName);
@@ -208,6 +213,22 @@ class Atlas
 
 			var region = new Region(image, Std.parseFloat(position[0]), Std.parseFloat(position[1]), Std.parseInt(size[0]), Std.parseInt(size[1]));
 			cache.set(lines[5 + (i * 7)], region);
+		}
+	}
+
+	public static function loadSimpleAtlas(image:Image, data:Blob):Void
+	{
+		if (cache == null)
+			cache = new Map<String, Region>();
+
+		var dataString = StringTools.trim(data.toString());
+		var lines = dataString.split('\n');
+
+		for (line in lines)
+		{
+			var dataItem = line.split(';');
+			var region = new Region(image, Std.parseInt(dataItem[1]), Std.parseInt(dataItem[2]), Std.parseInt(dataItem[3]), Std.parseInt(dataItem[4]));
+			cache.set(dataItem[0], region);
 		}
 	}
 }
