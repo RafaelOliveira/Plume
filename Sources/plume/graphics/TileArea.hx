@@ -27,14 +27,14 @@ class TileArea
 
 	public function render(g:Graphics, x:Float, y:Float, width:Int, height:Int):Void
 	{
-		width += Std.int(x);
-		height += Std.int(y);
+		//width += Std.int(x);
+		//height += Std.int(y);
 
 		sx = x;
 
-		while(y != height)
+		while(y < height)
 		{
-			while (x != width)
+			while (x < width)
 			{
 				g.drawScaledSubImage(region.image, region.sx, region.sy,
 									 region.w, region.h, x, y, region.w, region.h);

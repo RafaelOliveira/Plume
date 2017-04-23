@@ -8,6 +8,10 @@ import kha.graphics2.ImageScaleQuality;
 import kha.math.Vector2i;
 import plume.input.Manager;
 
+#if !js
+import kha.Display;
+#end
+
 @:structInit
 class EngineOptions
 {	

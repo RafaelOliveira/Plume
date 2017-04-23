@@ -12,12 +12,15 @@ class FormatTmx
 	public var tiles:Map<String, Array<Array<Int>>>;
 	public var objects:Map<String, Array<TmxObject>>;
 
-	public function new(tmxFile:Blob):Void
+	public function new(tmxFile:Blob, fixObjectPos:Bool = false):Void
 	{
 		var reader = new Reader(Xml.parse(tmxFile.toString()));
 		tmxMap = reader.read();
 
-		Tools.fixObjectPlacement(tmxMap);
+		// Only works with tile-objects. With rectangles
+		// the positions became wrong (they dont't need to be fixed).
+		if (fixObjectPos)
+			Tools.fixObjectPlacement(tmxMap);
 
 		for (layer in tmxMap.layers)
 		{
@@ -54,7 +57,7 @@ class FormatTmx
 		}
 	}
 
-	public function getTilesFromTileset(tilesetName:String):Map<Int, String>
+	public function getTileGidsFromTileset(tilesetName:String):Map<Int, String>
 	{
 		var tiles = new Map<Int, String>();
 

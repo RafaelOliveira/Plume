@@ -13,15 +13,15 @@ class Sprite
 	/**
 	 * The region inside the image that is rendered
 	 */
-	public var region(default, set):Region;
+	public var region:Region;
 	/**
 	 * A shortcut for the width of the region
 	 */
-	public var width(get, never):Int;
+	public var width(default, null):Int;
 	/**
 	 * A shortcut for the height of the region
 	 */
-	public var height(get, never):Int;
+	public var height(default, null):Int;
 	/**
 	 * A scale in x to render the region
 	 */
@@ -30,14 +30,6 @@ class Sprite
 	 * A scale in y to render the region
 	 */
 	public var scaleY(default, set):Float;
-	/**
-	 * The width of the region with the scale applied
-	 */
-	public var widthScaled(default, null):Int;
-	/**
-	 * The height of the region with the scale applied
-	 */		
-	public var heightScaled(default, null):Int;
 	/**
 	 * If the sprite should be rendered flipped
 	 */
@@ -63,12 +55,12 @@ class Sprite
 		flip = new Vector2b();
 	}
 	
-	function render(g:Graphics, x:Float, y:Float, cameraX:Float, cameraY:Float):Void 
+	public function render(g:Graphics, x:Float, y:Float):Void 
 	{
 		g.drawScaledSubImage(region.image, region.sx, region.sy, region.w, region.h,
-			x + (flip.x ? widthScaled : 0) - cameraX,
-			y + (flip.y ? heightScaled : 0) - cameraY, 
-			flip.x ? -widthScaled : widthScaled, flip.y ? -heightScaled : heightScaled);
+			x + (flip.x ? width : 0),
+			y + (flip.y ? height : 0), 
+			flip.x ? -width : width, flip.y ? -height : height);
 	}
 	
 	public function setScale(value:Float):Void
@@ -76,44 +68,29 @@ class Sprite
 		scaleX = value;
 		scaleY = value;
 	}
+
+	public function applyScale():Void
+	{
+		width = Std.int(region.w * scaleX);
+		height = Std.int(region.h * scaleY);
+	}
 	
 	public function setFlip(flipX:Bool, flipY:Bool):Void
 	{
 		flip.x = flipX;
 		flip.y = flipY;
-	}
-	
-	public function set_region(value:Region):Region
-	{
-		if (value != null)
-        {
-            widthScaled = Std.int(value.w * scaleX);
-		    heightScaled = Std.int(value.h * scaleY);    
-        }
-        		
-		return region = value;
-	}
-
-	inline public function get_width():Int
-	{
-		return region.w;
-	}
-
-	inline public function get_height():Int
-	{
-		return region.h;
-	}
+	}	
 		
-	public function set_scaleX(value:Float):Float
+	function set_scaleX(value:Float):Float
 	{		
-		widthScaled = Std.int(region.w * value);
+		width = Std.int(region.w * value);
 		
 		return scaleX = value;
 	}	
 	
-	public function set_scaleY(value:Float):Float
+	function set_scaleY(value:Float):Float
 	{
-		heightScaled = Std.int(region.h * value);
+		height = Std.int(region.h * value);
 		
 		return scaleY = value;
 	}
