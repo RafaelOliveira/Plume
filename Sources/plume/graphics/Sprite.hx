@@ -15,11 +15,11 @@ class Sprite
 	 */
 	public var region:Region;
 	/**
-	 * A shortcut for the width of the region
+	 * The width of the region scaled with scaleX
 	 */
 	public var width(default, null):Int;
 	/**
-	 * A shortcut for the height of the region
+	 * The height of the region scaled with scaleY
 	 */
 	public var height(default, null):Int;
 	/**

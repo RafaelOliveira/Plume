@@ -1,5 +1,6 @@
 package plume.atlas;
 
+import kha.graphics2.Graphics;
 import kha.Image;
 
 /**
@@ -28,6 +29,12 @@ class Region
 		this.sy = sy;
 		this.w = w;
 		this.h = h;
+	}
+
+	/** This is a simple render. To use things like flipping and scaling, use the class Sprite. */
+	inline public function render(g:Graphics, x:Float, y:Float):Void 
+	{
+		g.drawScaledSubImage(image, sx, sy, w, h, x, y, w, h);
 	}
 
 	public static function createFromImage(image:Image):Region
