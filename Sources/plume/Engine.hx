@@ -1,4 +1,5 @@
 package plume;
+
 import kha.System;
 import kha.Framebuffer;
 import kha.Scheduler;
@@ -40,29 +41,45 @@ class Engine
 	{
 		instance = this;		
 
-		highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;				
-
+		highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;
 		inputs = new Array<Manager>();
-
 		currTime = Scheduler.time();
 
-		if (options.bbWidth != null && options.bbHeight != null)
-		{
-			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
+		Plm.stateList = new Map<String, State>();
 
-			Plm.init(true, backbuffer.width, backbuffer.height);
+		if (options.bbWidth != null && options.bbHeight != null)
+			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
+			
+		setupGameWindow();	
+			
+		if (backbuffer != null)
 			System.notifyOnRender(renderWithBackbuffer);
+		else
+			System.notifyOnRender(renderWithFramebuffer);
+
+		Scheduler.addTimeTask(update, 0, 1 / 60);
+	}
+
+	function setupGameWindow():Void
+	{
+		Plm.windowWidth = System.windowWidth();
+		Plm.windowHeight = System.windowHeight();
+
+		if (backbuffer != null)
+		{
+			Plm.gameWidth = backbuffer.width;
+			Plm.gameHeight = backbuffer.height;
 		}
 		else
 		{
-			Plm.init(false, 0, 0);
-			System.notifyOnRender(renderWithFramebuffer);
+			Plm.gameWidth = Plm.windowWidth;
+			Plm.gameHeight = Plm.windowHeight;
 		}
 
-		Scheduler.addTimeTask(update, 0, 1 / 60);		
+		Plm.gameScale = Plm.windowWidth / Plm.gameWidth;
 	}
 
-	public function update():Void
+	function update():Void
 	{
 		prevTime = currTime;
 		currTime = Scheduler.time();
@@ -162,37 +179,18 @@ class Engine
 	public static function requestFullScreen():Void
 	{
 		#if js
-		if (isJsMobile())
-			kha.SystemImpl.khanvas.ontouchstart = function() onMouseDownFullscreen(0, 0, 0);
+		if (Plm.isMobile())
+			kha.SystemImpl.khanvas.ontouchstart = function() onMouseDownCanvasFullscreen(0, 0, 0);
 		else
-			kha.input.Mouse.get().notify(onMouseDownFullscreen, null, null, null, null);
+			kha.input.Mouse.get().notify(onMouseDownCanvasFullscreen, null, null, null, null);
 
-		kha.SystemImpl.notifyOfFullscreenChange(Plm.updateWindowSize, null);
+		kha.SystemImpl.notifyOfFullscreenChange(updateWindowSize, null);
 		#else
 		kha.SystemImpl.requestFullscreen();
-		#end		
+		#end
 	}
 
 	#if js
-	static function onMouseDownFullscreen(button:Int, x:Int, y:Int):Void
-	{
-		if (!kha.SystemImpl.isFullscreen())		
-			kha.SystemImpl.requestFullscreen();		
-	}
-
-	/*static function setCanvasScaleQuality(value:Bool):Void
-	{
-		var canvas:Dynamic = kha.SystemImpl.khanvas;
-
-		if (canvas != null)
-		{
-			canvas.mozImageSmoothingEnabled = value;
-			canvas.webkitImageSmoothingEnabled = value;
-			canvas.msImageSmoothingEnabled = value;
-			canvas.imageSmoothingEnabled = value;
-		}
-	}*/
-
 	public static function setCanvasToClientSize(canvasName:String = 'khanvas'):Void
 	{		
 		js.Browser.document.body.style.margin = '0px';
@@ -216,29 +214,52 @@ class Engine
 		khanvas.style.height = Std.string(h);
 
 		Engine.instance.canvasUsingClientSize = true;
-	}	
-
-	public static function isJsMobile():Bool
-	{
-		var mobile = ['iphone', 'ipad', 'android', 'blackberry', 'nokia', 'opera mini', 'windows mobile', 'windows phone', 'iemobile'];
-		for (i in 0...mobile.length)
-		{
-			if (js.Browser.navigator.userAgent.toLowerCase().indexOf(mobile[i].toLowerCase()) > 0)
-				return true;
-		}
-
-		return false;
 	}
 	#end
 
-	public static function isMobile():Bool
+	static function updateWindowSize():Void
 	{
 		#if js
-		return isJsMobile();
-		#elseif (sys_android || sys_android_native || sys_ios)
-		return true;		
+		if (instance.canvasUsingClientSize)
+		{
+			Plm.windowWidth = js.Browser.window.innerWidth;
+			Plm.windowHeight = js.Browser.window.innerHeight;
+
+			var khanvas = kha.SystemImpl.khanvas;
+			khanvas.width = Plm.windowWidth;
+			khanvas.height = Plm.windowHeight;
+			khanvas.style.width = '${Plm.windowWidth}px';
+			khanvas.style.height = '${Plm.windowHeight}px';
+		}
+		else
+		{
+			Plm.windowWidth = System.windowWidth();
+			Plm.windowHeight = System.windowHeight();
+		}
+
+		kha.SystemImpl.gl.viewport(0, 0, Plm.windowWidth, Plm.windowHeight);
+		#else
+		Plm.windowWidth = System.windowWidth();
+		Plm.windowHeight = System.windowHeight();
 		#end
 
-		return false;
+		if (instance.backbuffer == null)
+		{
+			Plm.gameWidth = Plm.windowWidth;
+			Plm.gameHeight = Plm.windowHeight;
+		}
+		
+		Plm.gameScale = Plm.windowWidth / Plm.gameWidth;
+
+		if (Plm.state != null)
+			Plm.state.windowSizeUpdated();
 	}
+
+	#if js
+	static function onMouseDownCanvasFullscreen(button:Int, x:Int, y:Int):Void
+	{
+		if (!kha.SystemImpl.isFullscreen())		
+			kha.SystemImpl.requestFullscreen();		
+	}			
+	#end	
 }

@@ -24,6 +24,8 @@ class Color
 	public inline static var p8Pink:Int = 0xFFFF77A8;
 	public inline static var p8Peach:Int = 0xFFFFCCAA;
 
+	// Game Boy green colors
+
 	public inline static var gbGreen1:Int = 0xFF7F860F;
 	public inline static var gbGreen2:Int = 0xFF577C45;
 	public inline static var gbGreen3:Int = 0xFF365D48;

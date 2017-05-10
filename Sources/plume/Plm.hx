@@ -1,10 +1,6 @@
 package plume;
 
-import kha.math.Vector2;
-import kha.System;
-
 #if js
-import js.html.Window;
 import js.html.CanvasElement;
 import js.html.ImageElement;
 #end
@@ -13,11 +9,12 @@ import js.html.ImageElement;
 class Plm
 {
 	static var stateList:Map<String, State>;
-
 	public static var state:State;
+	
 	public static var camera(get, null):Camera;
-
 	public static var dt(default, null):Float = 0;
+	public static var gameScale(default, null):Float;	
+
 	public static var windowWidth(default, null):Int;
 	public static var windowHeight(default, null):Int;
 	public static var gameWidth(default, null):Int;
@@ -26,68 +23,7 @@ class Plm
 	private static var shakeTime:Float = 0;
 	private static var shakeMagnitude:Int = 0;
 	private static var shakeX:Int = 0;
-	private static var shakeY:Int = 0;
-
-	public static var gameScale(default, null):Float;
-
-	static function init(useBackbuffer:Bool, bbWidth:Int, bbHeight:Int):Void
-	{
-		stateList = new Map<String, State>();
-
-		windowWidth = System.windowWidth();
-		windowHeight = System.windowHeight();
-
-		if (useBackbuffer)
-		{
-			gameWidth = bbWidth;
-			gameHeight = bbHeight;
-		}
-		else
-		{
-			gameWidth = windowWidth;
-			gameHeight = windowHeight;
-		}
-
-		gameScale = windowWidth / gameWidth;
-	}
-
-	static function updateWindowSize():Void
-	{
-		#if js
-		if (Engine.instance.canvasUsingClientSize)
-		{
-			windowWidth = js.Browser.window.innerWidth;
-			windowHeight = js.Browser.window.innerHeight;
-
-			var khanvas = kha.SystemImpl.khanvas;
-			khanvas.width = windowWidth;
-			khanvas.height = windowHeight;
-			khanvas.style.width = '${windowWidth}px';
-			khanvas.style.height = '${windowHeight}px';
-		}
-		else
-		{
-			windowWidth = System.windowWidth();
-			windowHeight = System.windowHeight();
-		}
-
-		kha.SystemImpl.gl.viewport(0, 0, windowWidth, windowHeight);
-		#else
-		windowWidth = System.windowWidth();
-		windowHeight = System.windowHeight();
-		#end
-
-		if (Engine.instance.backbuffer == null)
-		{
-			gameWidth = windowWidth;
-			gameHeight = windowHeight;
-		}
-		
-		gameScale = windowWidth / gameWidth;
-
-		if (state != null)
-			state.windowSizeUpdated();
-	}
+	private static var shakeY:Int = 0;	
 
 	public static function addState(state:State, name:String, go:Bool = false):Void
 	{
@@ -268,10 +204,10 @@ class Plm
 			shakeX = shakeY = 0;
 		}
 	}
-
-	#if js
-	public static function createScreenshot(mimeType:String = 'image/png'):Void
+	
+	public static function saveScreenshot(mimeType:String = 'image/png'):Void
 	{		
+		#if js
 		var canvas = kha.SystemImpl.khanvas;
 
 		var screenshotCanvas:CanvasElement = cast js.Browser.document.createElement('canvas');
@@ -287,7 +223,14 @@ class Plm
 		
 		if (newWindow != null)
 		{
-			adjustScreenshotWindow(newWindow);
+			newWindow.document.body.style.margin = '0px';
+			newWindow.document.body.style.padding = '0px';
+			newWindow.document.body.style.height = '100%';
+			newWindow.document.body.style.overflow = 'hidden';		
+			newWindow.document.documentElement.style.margin = '0px';
+			newWindow.document.documentElement.style.padding = '0px';
+			newWindow.document.documentElement.style.height = '100%';
+			newWindow.document.documentElement.style.overflow = 'hidden';
 
 			var img:ImageElement = cast newWindow.document.createElement('img');
 			img.src = base64Image;
@@ -295,20 +238,27 @@ class Plm
 		}
 		else
 			trace('It wasn\'t possible to create a new window for the screenshot');
-	}
+		#else
+		trace('Function not implemented in this target');
+		#end
+	}	
 
-	static function adjustScreenshotWindow(window:Window):Void
+	public static function isMobile():Bool
 	{
-		window.document.body.style.margin = '0px';
-		window.document.body.style.padding = '0px';
-		window.document.body.style.height = '100%';
-		window.document.body.style.overflow = 'hidden';		
-		window.document.documentElement.style.margin = '0px';
-		window.document.documentElement.style.padding = '0px';
-		window.document.documentElement.style.height = '100%';
-		window.document.documentElement.style.overflow = 'hidden';
+		#if js
+		var mobile = ['iphone', 'ipad', 'android', 'blackberry', 'nokia', 'opera mini', 'windows mobile', 'windows phone', 'iemobile'];
+
+		for (i in 0...mobile.length)
+		{
+			if (js.Browser.navigator.userAgent.toLowerCase().indexOf(mobile[i].toLowerCase()) > 0)
+				return true;
+		}
+		#elseif (sys_android || sys_android_native || sys_ios)
+		return true;		
+		#end
+
+		return false;
 	}
-	#end
 
 	inline static function get_camera():Camera
 	{
