@@ -26,35 +26,7 @@ class Key
 	public inline static var PAGE_UP = 33;
 	public inline static var LEFT_SQUARE_BRACKET = 219;
 	public inline static var RIGHT_SQUARE_BRACKET = 221;
-	public inline static var TILDE = 192;
-
-
-	/*public inline static var a = 97;
-	public inline static var b = 98;
-	public inline static var c = 99;
-	public inline static var d = 100;
-	public inline static var e = 101;
-	public inline static var f = 102;
-	public inline static var g = 103;
-	public inline static var h = 104;
-	public inline static var i = 105;
-	public inline static var j = 106;
-	public inline static var k = 107;
-	public inline static var l = 108;
-	public inline static var m = 109;
-	public inline static var n = 110;
-	public inline static var o = 111;
-	public inline static var p = 112;
-	public inline static var q = 113;
-	public inline static var r = 114;
-	public inline static var s = 115;
-	public inline static var t = 116;
-	public inline static var u = 117;
-	public inline static var v = 118;
-	public inline static var w = 119;
-	public inline static var x = 120;
-	public inline static var y = 121;
-	public inline static var z = 122;*/
+	public inline static var TILDE = 192;	
 
 	public inline static var A = 65;
 	public inline static var B = 66;

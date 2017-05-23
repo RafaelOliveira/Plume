@@ -7,7 +7,7 @@ import kha.Scaler;
 import kha.Image;
 import kha.graphics2.ImageScaleQuality;
 import kha.math.Vector2i;
-import plume.input.Manager;
+import plume.input.Input;
 
 #if !js
 import kha.Display;
@@ -16,17 +16,20 @@ import kha.Display;
 @:structInit
 class EngineOptions
 {	
+	@:optional public var fps:Null<Int>;
 	@:optional public var bbWidth:Null<Int>;
 	@:optional public var bbHeight:Null<Int>;
-	@:optional public var highQualityScale:Null<Bool>;	
+	@:optional public var highQualityScale:Null<Bool>;
+	@:optional public var keyboard:Null<Bool>;
+	@:optional public var mouse:Null<Bool>;
+	@:optional public var touch:Null<Bool>;
 }
 
 @:allow(plume.Plm)
 class Engine
 {	
 	var backbuffer:Image;
-	var highQualityScale:Bool;
-	var inputs:Array<Manager>;
+	var highQualityScale:Bool;	
 
 	var currTime:Float = 0;
 	var prevTime:Float = 0;	
@@ -37,18 +40,42 @@ class Engine
 
 	static var instance:Engine;
 
-	public function new(options:EngineOptions):Void
+	public function new(?options:EngineOptions):Void
 	{
-		instance = this;		
+		instance = this;
 
-		highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;
-		inputs = new Array<Manager>();
+		var fps = 60;
+
+		if (options != null)
+		{
+			highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;
+
+			if (options.bbWidth != null && options.bbHeight != null)
+				backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
+
+			if (options.fps != null)
+				fps = options.fps;
+
+			var inputOption = 0;
+
+			if (options.keyboard != null && options.keyboard == true)
+				inputOption |= Input.KEYBOARD;
+
+			if (options.mouse != null && options.mouse == true)
+				inputOption |= Input.MOUSE;
+
+			if (options.touch != null && options.touch == true)
+				inputOption |= Input.TOUCH;
+
+			if (inputOption > 0)
+				Input.enable(inputOption);
+		}
+		else
+			highQualityScale = false;
+				
 		currTime = Scheduler.time();
 
-		Plm.stateList = new Map<String, State>();
-
-		if (options.bbWidth != null && options.bbHeight != null)
-			backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
+		Plm.stateList = new Map<String, State>();		
 			
 		setupGameWindow();	
 			
@@ -57,7 +84,7 @@ class Engine
 		else
 			System.notifyOnRender(renderWithFramebuffer);
 
-		Scheduler.addTimeTask(update, 0, 1 / 60);
+		Scheduler.addTimeTask(update, 0, 1 / fps);
 	}
 
 	function setupGameWindow():Void
@@ -87,10 +114,8 @@ class Engine
 
 		if (Plm.state != null)
 		{
-			Plm.state.update();
-
-			for (input in inputs)
-				input.update();
+			Plm.state.update();			
+			Input.update();
 
 			Plm.updateScreenShake();
 		}
@@ -126,21 +151,6 @@ class Engine
 			Scaler.scale(backbuffer, framebuffer, System.screenRotation);
 			framebuffer.g2.end();
 		}
-	}
-
-	public function enableInput(options:Int):Void
-	{
-		if (options & Manager.KEYBOARD == Manager.KEYBOARD)
-			inputs.push(plume.input.Keyboard.get());
-
-		if (options & Manager.MOUSE == Manager.MOUSE)
-			inputs.push(plume.input.Mouse.get());
-
-		/*if (options & Manager.TOUCH == Manager.TOUCH)
-			inputs.push(new plume.input.Touch());
-
-		if (options & Manager.GAMEPAD == Manager.GAMEPAD)
-			inputs.push(plume.input.GamePad.getManager());*/
 	}
 
 	public static function getSizePrimaryScreen():Vector2i
