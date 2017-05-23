@@ -15,4 +15,5 @@ class State
 	public function update():Void {}
 	public function windowSizeUpdated():Void {}
 	public function render(g:Graphics):Void {}
+	public function destroy():Void {}
 }

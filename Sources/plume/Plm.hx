@@ -36,6 +36,23 @@ class Plm
 		}
 	}
 
+	public static function removeState(name:String, destroy:Bool = false):Void
+	{
+		if (destroy)
+		{
+			var state = stateList.get(name);
+
+			if (state != null)
+			{
+				state.destroy();
+				stateList.remove(name);
+				state = null;
+			}
+			else
+				stateList.remove(name);
+		}
+	}
+
 	public static function switchState(name:String):Bool
 	{
 		var state = stateList.get(name);
@@ -165,6 +182,16 @@ class Plm
 	public inline static function scale(value:Float, min:Float, max:Float, min2:Float, max2:Float):Float
 	{
 		return min2 + ((value - min) / (max - min)) * (max2 - min2);
+	}
+
+	public inline static function radian(value:Float):Float
+	{
+		return value * (Math.PI / 180);
+	}
+
+	public inline static function degree(value:Float):Float
+	{
+		return value * (180 / Math.PI);
 	}
 
 	public static function shake(magnitude:Int, duration:Float)
