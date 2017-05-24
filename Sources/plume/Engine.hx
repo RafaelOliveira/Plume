@@ -1,5 +1,6 @@
 package plume;
 
+import kha.math.Vector2i;
 import kha.System;
 import kha.Framebuffer;
 import kha.Scheduler;
@@ -8,6 +9,9 @@ import kha.Image;
 import kha.graphics2.ImageScaleQuality;
 import kha.math.Vector2i;
 import plume.input.Input;
+import plume.input.Keyboard;
+import plume.input.Mouse;
+import plume.input.Touch;
 
 #if !js
 import kha.Display;
@@ -29,13 +33,15 @@ class EngineOptions
 class Engine
 {	
 	var backbuffer:Image;
-	var highQualityScale:Bool;	
+	var highQualityScale:Bool;
+	var inputs:Array<Input>;	
 
 	var currTime:Float = 0;
 	var prevTime:Float = 0;	
 
 	#if js
-	var canvasUsingClientSize:Bool = false;
+	static var canvasUsingClientSize:Bool = false;
+	static var canvasSizeBeforeFullscreen:Vector2i;
 	#end
 
 	static var instance:Engine;
@@ -44,7 +50,7 @@ class Engine
 	{
 		instance = this;
 
-		var fps = 60;
+		var fps:Int = 60;
 
 		if (options != null)
 		{
@@ -56,28 +62,25 @@ class Engine
 			if (options.fps != null)
 				fps = options.fps;
 
-			var inputOption = 0;
+			inputs = new Array<Input>();
 
 			if (options.keyboard != null && options.keyboard == true)
-				inputOption |= Input.KEYBOARD;
+				inputs.push(Keyboard.get());
 
 			if (options.mouse != null && options.mouse == true)
-				inputOption |= Input.MOUSE;
+				inputs.push(Mouse.get());
 
 			if (options.touch != null && options.touch == true)
-				inputOption |= Input.TOUCH;
-
-			if (inputOption > 0)
-				Input.enable(inputOption);
+				inputs.push(Touch.get());
 		}
-		else
-			highQualityScale = false;
+		else		
+			highQualityScale = false;		
 				
 		currTime = Scheduler.time();
 
 		Plm.stateList = new Map<String, State>();		
 			
-		setupGameWindow();	
+		setupGameWindow();
 			
 		if (backbuffer != null)
 			System.notifyOnRender(renderWithBackbuffer);
@@ -115,7 +118,9 @@ class Engine
 		if (Plm.state != null)
 		{
 			Plm.state.update();			
-			Input.update();
+			
+			for (input in inputs)
+				input.update();
 
 			Plm.updateScreenShake();
 		}
@@ -189,12 +194,15 @@ class Engine
 	public static function requestFullScreen():Void
 	{
 		#if js
+		if (!canvasUsingClientSize)
+			canvasSizeBeforeFullscreen = new Vector2i(System.windowWidth(), System.windowHeight());
+
 		if (Plm.isMobile())
 			kha.SystemImpl.khanvas.ontouchstart = function() onMouseDownCanvasFullscreen(0, 0, 0);
 		else
 			kha.input.Mouse.get().notify(onMouseDownCanvasFullscreen, null, null, null, null);
 
-		kha.SystemImpl.notifyOfFullscreenChange(updateWindowSize, null);
+		kha.SystemImpl.notifyOfFullscreenChange(updateCanvasSize, null);
 		#else
 		kha.SystemImpl.requestFullscreen();
 		#end
@@ -223,35 +231,35 @@ class Engine
 		khanvas.style.width = Std.string(w);
 		khanvas.style.height = Std.string(h);
 
-		Engine.instance.canvasUsingClientSize = true;
+		canvasUsingClientSize = true;
 	}
-	#end
 
-	static function updateWindowSize():Void
+	static function onMouseDownCanvasFullscreen(button:Int, x:Int, y:Int):Void
 	{
-		#if js
-		if (instance.canvasUsingClientSize)
+		if (!kha.SystemImpl.isFullscreen())		
+			kha.SystemImpl.requestFullscreen();		
+	}
+	
+	static function updateCanvasSize():Void
+	{		
+		if (canvasUsingClientSize || js.Browser.document.fullscreenEnabled)
 		{
 			Plm.windowWidth = js.Browser.window.innerWidth;
-			Plm.windowHeight = js.Browser.window.innerHeight;
-
-			var khanvas = kha.SystemImpl.khanvas;
-			khanvas.width = Plm.windowWidth;
-			khanvas.height = Plm.windowHeight;
-			khanvas.style.width = '${Plm.windowWidth}px';
-			khanvas.style.height = '${Plm.windowHeight}px';
+			Plm.windowHeight = js.Browser.window.innerHeight;			
 		}
 		else
 		{
-			Plm.windowWidth = System.windowWidth();
-			Plm.windowHeight = System.windowHeight();
+			Plm.windowWidth = canvasSizeBeforeFullscreen.x;
+			Plm.windowHeight = canvasSizeBeforeFullscreen.y;
 		}
 
-		kha.SystemImpl.gl.viewport(0, 0, Plm.windowWidth, Plm.windowHeight);
-		#else
-		Plm.windowWidth = System.windowWidth();
-		Plm.windowHeight = System.windowHeight();
-		#end
+		var khanvas = kha.SystemImpl.khanvas;
+		khanvas.width = Plm.windowWidth;
+		khanvas.height = Plm.windowHeight;
+		khanvas.style.width = '${Plm.windowWidth}px';
+		khanvas.style.height = '${Plm.windowHeight}px';
+
+		kha.SystemImpl.gl.viewport(0, 0, Plm.windowWidth, Plm.windowHeight);		
 
 		if (instance.backbuffer == null)
 		{
@@ -263,13 +271,6 @@ class Engine
 
 		if (Plm.state != null)
 			Plm.state.windowSizeUpdated();
-	}
-
-	#if js
-	static function onMouseDownCanvasFullscreen(button:Int, x:Int, y:Int):Void
-	{
-		if (!kha.SystemImpl.isFullscreen())		
-			kha.SystemImpl.requestFullscreen();		
-	}			
+	}				
 	#end	
 }
