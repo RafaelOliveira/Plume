@@ -13,8 +13,15 @@ import plume.input.Keyboard;
 import plume.input.Mouse;
 import plume.input.Touch;
 
+#if (js && !sys_debug_html5 && web_mobile)
+import plume.tools.WebMobile;
+#end
+
 #if !js
 import kha.Display;
+#else
+import js.Browser;
+import kha.SystemImpl;
 #end
 
 @:structInit
@@ -27,11 +34,16 @@ class EngineOptions
 	@:optional public var keyboard:Null<Bool>;
 	@:optional public var mouse:Null<Bool>;
 	@:optional public var touch:Null<Bool>;
+
+	#if (js && !sys_debug_html5 && web_mobile)
+	public var warningState:State;
+	public var rightOrientation:Int;
+	#end
 }
 
 @:allow(plume.Plm)
 class Engine
-{	
+{
 	var backbuffer:Image;
 	var highQualityScale:Bool;
 	var inputs:Array<Input>;	
@@ -41,8 +53,12 @@ class Engine
 
 	#if js
 	static var canvasUsingClientSize:Bool = false;
-	static var canvasSizeBeforeFullscreen:Vector2i;
+	static var canvasSizeBeforeFullscreen:Vector2i;	
 	#end
+
+	#if (js && !sys_debug_html5 && web_mobile)
+	var webMobile:WebMobile;
+	#end	
 
 	static var instance:Engine;
 
@@ -72,6 +88,10 @@ class Engine
 
 			if (options.touch != null && options.touch == true)
 				inputs.push(Touch.get());
+
+			#if (js && !sys_debug_html5 && web_mobile)
+			webMobile = new WebMobile(options.warningState, options.rightOrientation);
+			#end
 		}
 		else		
 			highQualityScale = false;		
@@ -80,7 +100,7 @@ class Engine
 
 		Plm.stateList = new Map<String, State>();		
 			
-		setupGameWindow();
+		setupGameWindow();		
 			
 		if (backbuffer != null)
 			System.notifyOnRender(renderWithBackbuffer);
@@ -114,6 +134,10 @@ class Engine
 		prevTime = currTime;
 		currTime = Scheduler.time();
 		Plm.dt = currTime - prevTime;
+
+		#if (js && !sys_debug_html5 && web_mobile)
+		webMobile.update();		
+		#end
 
 		if (Plm.state != null)
 		{
@@ -202,34 +226,25 @@ class Engine
 		else
 			kha.input.Mouse.get().notify(onMouseDownCanvasFullscreen, null, null, null, null);
 
-		kha.SystemImpl.notifyOfFullscreenChange(updateCanvasSize, null);
+		kha.SystemImpl.notifyOfFullscreenChange(onFullscreenChange, null);
 		#else
 		kha.SystemImpl.requestFullscreen();
 		#end
 	}
 
 	#if js
-	public static function setCanvasToClientSize(canvasName:String = 'khanvas'):Void
+	public static function setCanvasToClientSize():Void
 	{		
-		js.Browser.document.body.style.margin = '0px';
-		js.Browser.document.body.style.padding = '0px';
-		js.Browser.document.body.style.height = '100%';
-		js.Browser.document.body.style.overflow = 'hidden';		
-		js.Browser.document.documentElement.style.margin = '0px';
-		js.Browser.document.documentElement.style.padding = '0px';
-		js.Browser.document.documentElement.style.height = '100%';
-		js.Browser.document.documentElement.style.overflow = 'hidden';
+		Browser.document.body.style.margin = '0px';
+		Browser.document.body.style.padding = '0px';
+		Browser.document.body.style.height = '100%';
+		Browser.document.body.style.overflow = 'hidden';		
+		Browser.document.documentElement.style.margin = '0px';
+		Browser.document.documentElement.style.padding = '0px';
+		Browser.document.documentElement.style.height = '100%';
+		Browser.document.documentElement.style.overflow = 'hidden';
 
-		var khanvas:js.html.CanvasElement = kha.SystemImpl.khanvas != null ? 
-			kha.SystemImpl.khanvas : cast js.Browser.document.getElementById(canvasName);
-
-		var w:Int = js.Browser.window.innerWidth;
-		var h:Int = js.Browser.window.innerHeight;
-
-		khanvas.width = w;
-		khanvas.height = h;
-		khanvas.style.width = Std.string(w);
-		khanvas.style.height = Std.string(h);
+		updateCanvasSize(Browser.window.innerWidth, Browser.window.innerHeight);
 
 		canvasUsingClientSize = true;
 	}
@@ -240,26 +255,21 @@ class Engine
 			kha.SystemImpl.requestFullscreen();		
 	}
 	
-	static function updateCanvasSize():Void
+	static function onFullscreenChange():Void
 	{		
-		if (canvasUsingClientSize || js.Browser.document.fullscreenEnabled)
-		{
-			Plm.windowWidth = js.Browser.window.innerWidth;
-			Plm.windowHeight = js.Browser.window.innerHeight;			
-		}
+		if (canvasUsingClientSize || Browser.document.fullscreenEnabled)
+			updateGameSize(Browser.window.innerWidth, Browser.window.innerHeight);
 		else
-		{
-			Plm.windowWidth = canvasSizeBeforeFullscreen.x;
-			Plm.windowHeight = canvasSizeBeforeFullscreen.y;
-		}
+			updateGameSize(canvasSizeBeforeFullscreen.x, canvasSizeBeforeFullscreen.y);		
 
-		var khanvas = kha.SystemImpl.khanvas;
-		khanvas.width = Plm.windowWidth;
-		khanvas.height = Plm.windowHeight;
-		khanvas.style.width = '${Plm.windowWidth}px';
-		khanvas.style.height = '${Plm.windowHeight}px';
+		updateCanvasSize(Plm.windowWidth, Plm.windowHeight);		
+	}
 
-		kha.SystemImpl.gl.viewport(0, 0, Plm.windowWidth, Plm.windowHeight);		
+	@:allow(plume.tools.WebMobile)
+	static function updateGameSize(windowWidth:Int, windowHeight:Int):Void
+	{
+		Plm.windowWidth = windowWidth;
+		Plm.windowHeight = windowHeight;
 
 		if (instance.backbuffer == null)
 		{
@@ -271,6 +281,21 @@ class Engine
 
 		if (Plm.state != null)
 			Plm.state.windowSizeUpdated();
-	}				
+	}
+
+	@:allow(plume.tools.WebMobile)
+	static function updateCanvasSize(canvasWidth:Int, canvasHeight:Int):Void
+	{
+		//var khanvas:js.html.CanvasElement = kha.SystemImpl.khanvas != null ? 
+		//	kha.SystemImpl.khanvas : cast js.Browser.document.getElementById('khanvas');
+		var khanvas = SystemImpl.khanvas;
+
+		khanvas.width = canvasWidth;
+		khanvas.height = canvasHeight;
+		khanvas.style.width = Std.string(canvasWidth);
+		khanvas.style.height = Std.string(canvasHeight);
+
+		SystemImpl.gl.viewport(0, 0, canvasWidth, canvasHeight);
+	}
 	#end	
 }
