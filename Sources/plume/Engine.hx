@@ -36,8 +36,8 @@ class EngineOptions
 	@:optional public var touch:Null<Bool>;
 
 	#if (js && !sys_debug_html5 && web_mobile)
-	public var warningState:State;
-	public var rightOrientation:Int;
+	@:optional public var warningState:State;
+	@:optional public var rightOrientation:Int;
 	#end
 }
 
@@ -90,15 +90,16 @@ class Engine
 				inputs.push(Touch.get());
 
 			#if (js && !sys_debug_html5 && web_mobile)
-			webMobile = new WebMobile(options.warningState, options.rightOrientation);
+			if (options.warningState != null && options.rightOrientation != null)
+				webMobile = new WebMobile(options.warningState, options.rightOrientation);
 			#end
 		}
-		else		
+		else	
 			highQualityScale = false;		
 				
 		currTime = Scheduler.time();
 
-		Plm.stateList = new Map<String, State>();		
+		Plm.stateList = new Map<String, State>();
 			
 		setupGameWindow();		
 			
@@ -107,7 +108,12 @@ class Engine
 		else
 			System.notifyOnRender(renderWithFramebuffer);
 
-		Scheduler.addTimeTask(update, 0, 1 / fps);
+		#if (js && !sys_debug_html5 && web_mobile)
+		if (webMobile != null)
+			Scheduler.addTimeTask(updateWebMobile, 0, 1 / fps);
+		else
+		#end
+			Scheduler.addTimeTask(update, 0, 1 / fps);
 	}
 
 	function setupGameWindow():Void
@@ -131,17 +137,31 @@ class Engine
 
 	function update():Void
 	{
+		updateDeltaTime();
+		updateState();
+	}
+
+	#if (js && !sys_debug_html5 && web_mobile)
+	function updateWebMobile()
+	{
+		updateDeltaTime();
+		webMobile.update();
+		updateState();
+	}
+	#end
+
+	inline function updateDeltaTime():Void
+	{
 		prevTime = currTime;
 		currTime = Scheduler.time();
 		Plm.dt = currTime - prevTime;
+	}
 
-		#if (js && !sys_debug_html5 && web_mobile)
-		webMobile.update();		
-		#end
-
+	inline function updateState():Void
+	{
 		if (Plm.state != null)
 		{
-			Plm.state.update();			
+			Plm.state.update();
 			
 			for (input in inputs)
 				input.update();

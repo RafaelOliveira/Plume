@@ -20,10 +20,10 @@ class Plm
 	public static var gameWidth(default, null):Int;
 	public static var gameHeight(default, null):Int;
 
-	private static var shakeTime:Float = 0;
-	private static var shakeMagnitude:Int = 0;
-	private static var shakeX:Int = 0;
-	private static var shakeY:Int = 0;	
+	static var shakeTime:Float = 0;
+	static var shakeMagnitude:Int = 0;
+	static var shakeX:Int = 0;
+	static var shakeY:Int = 0;	
 
 	public static function addState(state:State, name:String, go:Bool = false):Void
 	{
@@ -208,7 +208,7 @@ class Plm
 		shakeTime = 0;
 	}
 		
-	private inline static function updateScreenShake():Void
+	static function updateScreenShake():Void
 	{
 		if (shakeTime > 0)
 		{
