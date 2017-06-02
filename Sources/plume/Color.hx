@@ -30,4 +30,16 @@ class Color
 	public inline static var gbGreen2:Int = 0xFF577C45;
 	public inline static var gbGreen3:Int = 0xFF365D48;
 	public inline static var gbGreen4:Int = 0xFF2A453B;
+
+	// CGA 0 (plus black)
+
+	public inline static var cga0Yellow:Int = 0xFFFFFF55;
+	public inline static var cga0Red:Int = 0xFFFF5555;	
+	public inline static var cga0Green:Int = 0xFF55FF55;
+
+
+	// GCA 1 (plus black and white)
+
+	public inline static var cga1Blue:Int = 0xFF55FFFF;
+	public inline static var cga1Magenta:Int = 0xFFFF55FF;
 }
