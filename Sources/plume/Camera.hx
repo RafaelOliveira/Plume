@@ -122,4 +122,14 @@ class Camera
                 y = height - Plm.gameHeight;
         }
     }
+
+    public inline static function cx(x:Float):Float
+    {
+        return x - Plm.camera.x;
+    }
+
+    public inline static function cy(y:Float):Float
+    {
+        return y - Plm.camera.y;
+    }    
 }

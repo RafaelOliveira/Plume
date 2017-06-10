@@ -4,7 +4,14 @@ import kha.Blob;
 import format.tmx.Data.TmxMap;
 import format.tmx.Reader;
 import format.tmx.Data.TmxObject;
+import format.tmx.Data.TmxObjectType;
 import format.tmx.Tools;
+
+#if differ
+import differ.shapes.Shape;
+import differ.shapes.Polygon as DifferPolygon;
+import differ.math.Vector as DifferVector;
+#end
 
 class FormatTmx
 {	
@@ -79,5 +86,48 @@ class FormatTmx
 		}
 
 		return tiles;
+	}
+
+	#if differ
+	public function getCollisionShapes(layerName:String):Array<Shape>
+	{
+		var collShapes = new Array<Shape>();
+		var objectGroup = objects.get(layerName);
+
+		for (object in objectGroup)
+		{
+			switch(object.objectType)
+			{
+				case TmxObjectType.Rectangle:
+					collShapes.push(DifferPolygon.rectangle(object.x, object.y, object.width, object.height, false));
+
+				case Polygon(points):
+					var vertices = new Array<DifferVector>();
+
+					for (p in points)
+						vertices.push(new DifferVector(p.x, p.y));
+
+					collShapes.push(new DifferPolygon(object.x, object.y, vertices));
+
+				default:
+					continue;
+			}
+		}
+
+		return collShapes;
+	}
+	#end
+
+	public function destroy():Void
+	{
+		for (key in tiles.keys())
+			tiles.remove(key);
+		
+		for (key in objects.keys())
+			objects.remove(key);
+		
+		tiles = null;
+		objects = null;
+		tmxMap = null;
 	}
 }

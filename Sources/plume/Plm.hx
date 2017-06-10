@@ -67,6 +67,12 @@ class Plm
 			return false;
 	}
 
+	public static function setState(state:State):Void
+	{
+		Plm.state = state;
+		Plm.state.init();
+	}
+
 	/**
 	 * Find the distance between two points.
 	 * @param	x1		The first x-position.

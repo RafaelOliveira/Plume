@@ -1,7 +1,6 @@
 package plume.input;
 
 import kha.input.Keyboard as KhaKeyboard;
-import kha.Key as KhaKey;
 
 class Keyboard implements Input
 {
@@ -31,35 +30,19 @@ class Keyboard implements Input
 		return instance;
 	}
 
-	function onKeyDown(key:KhaKey, char:String):Void
+	function onKeyDown(key:Int):Void
 	{
-		var code:Int = getCode(key);
-
-		if(code == -1)
-			code = char.toUpperCase().charCodeAt(0);
-
-		if (code == -1) // no key
-			return;
-
-		keysPressed.set(code, true);
-		keysDown.set(code, true);
+		keysPressed.set(key, true);
+		keysDown.set(key, true);
 
 		keyCount++;
 		keysJustPressed = true;
 	}
 
-	function onUpKey(key:KhaKey, char:String):Void
+	function onUpKey(key:Int):Void
 	{
-		var code:Int = getCode(key);
-
-		if (code == -1)
-			code = char.toUpperCase().charCodeAt(0);
-
-		if (code == -1) // no key
-			return;
-
-		keysUp.set(code, true);
-		keysDown.set(code, false);
+		keysUp.set(key, true);
+		keysDown.set(key, false);
 
 		keyCount--;
 	}
@@ -99,40 +82,5 @@ class Keyboard implements Input
 	inline public function isAnyPressed():Bool
 	{
 		return keysJustPressed;
-	}
-
-	private function getCode(k:KhaKey):Int
-	{
-		switch(k)
-		{
-			case KhaKey.BACKSPACE:
-				return Key.BACKSPACE;
-			case KhaKey.DEL:
-				return Key.DELETE;
-			case KhaKey.DOWN:
-				return Key.DOWN;
-			case KhaKey.UP:
-				return Key.UP;
-			case KhaKey.LEFT:
-				return Key.LEFT;
-			case KhaKey.RIGHT:
-				return Key.RIGHT;
-			case KhaKey.SHIFT:
-				return Key.SHIFT;
-			case KhaKey.BACK:
-			case KhaKey.ESC:
-				return Key.ESCAPE;
-			case KhaKey.ENTER:
-				return Key.ENTER;
-			case KhaKey.TAB:
-				return Key.TAB;
-			case KhaKey.CTRL:
-				return Key.CONTROL;
-			case KhaKey.ALT:
-			case KhaKey.CHAR:
-				return -1;
-		}
-
-		return -1;
-	}
+	}	
 }
