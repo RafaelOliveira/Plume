@@ -6,7 +6,6 @@ import js.html.ImageElement;
 #end
 
 @:allow(plume.Engine)
-@:allow(plume.State)
 class Plm
 {
 	static var stateList:Map<String, State>;
