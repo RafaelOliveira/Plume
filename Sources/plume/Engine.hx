@@ -161,12 +161,12 @@ class Engine
 	{
 		if (Plm.state != null)
 		{
-			Plm.state.update();
+			Plm.state.update();			
 			
 			for (input in inputs)
 				input.update();
 
-			Plm.updateScreenShake();
+			Plm.state.updateCameras();
 		}
 	}
 

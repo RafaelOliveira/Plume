@@ -225,16 +225,16 @@ class Tilemap
 		}
 	}
 
-	public function renderInCamera(g:Graphics, x:Float, y:Float, cameraX:Float, cameraY:Float):Void 
+	public function renderInCamera(g:Graphics, x:Float, y:Float, camera:Camera):Void 
 	{				
-		if 	(((x + width) < cameraX) || (x > (cameraX + Plm.gameWidth)) ||
-			((y + height) < cameraY) || (y > (cameraY + Plm.gameHeight)))
+		if 	(((x + width) < camera.x) || (x > (camera.x + camera.width)) ||
+			((y + height) < camera.y) || (y > (camera.y + camera.height)))
 				return;		   
 		
-		_startCol = Math.floor((x > cameraX ? 0 : (cameraX - x)) / tileWidth);
-		_endCol = Std.int(((x + width) > (cameraX + Plm.gameWidth) ? (cameraX + Plm.gameWidth - x) : width) / tileWidth);
-		_startRow = Math.floor((y > cameraY ? 0 : (cameraY - y)) / tileHeight);
-		_endRow = Std.int(((y + height) > (cameraY + Plm.gameHeight) ? (cameraY + Plm.gameHeight - y) : height) / tileHeight);						
+		_startCol = Math.floor((x > camera.x ? 0 : (camera.x - x)) / tileWidth);
+		_endCol = Std.int(((x + width) > (camera.x + camera.width) ? (camera.x + camera.width - x) : width) / tileWidth);
+		_startRow = Math.floor((y > camera.y ? 0 : (camera.y - y)) / tileHeight);
+		_endRow = Std.int(((y + height) > (camera.y + camera.height) ? (camera.y + camera.height - y) : height) / tileHeight);						
 		
 		if (_endCol < columns)
 			_endCol++;
@@ -249,8 +249,8 @@ class Tilemap
 				var tile = data[r][c];
 				if (tile != -1)
 				{
-					_x = x + (c * tileWidth) - cameraX;
-					_y = y + (r * tileHeight) - cameraY;
+					_x = x + (c * tileWidth);
+					_y = y + (r * tileHeight);
 					
 					tileset.render(g, tile, _x, _y);
 				}

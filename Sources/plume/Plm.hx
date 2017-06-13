@@ -6,24 +6,22 @@ import js.html.ImageElement;
 #end
 
 @:allow(plume.Engine)
+@:allow(plume.State)
 class Plm
 {
 	static var stateList:Map<String, State>;
 	public static var state:State;
 	
+	/** Default camera (the first in the actual state) **/
 	public static var camera(get, null):Camera;
+
 	public static var dt(default, null):Float = 0;
 	public static var gameScale(default, null):Float;	
 
 	public static var windowWidth(default, null):Int;
 	public static var windowHeight(default, null):Int;
 	public static var gameWidth(default, null):Int;
-	public static var gameHeight(default, null):Int;
-
-	static var shakeTime:Float = 0;
-	static var shakeMagnitude:Int = 0;
-	static var shakeX:Int = 0;
-	static var shakeY:Int = 0;	
+	public static var gameHeight(default, null):Int;	
 
 	public static function addState(state:State, name:String, go:Bool = false):Void
 	{
@@ -199,44 +197,6 @@ class Plm
 	{
 		return value * (180 / Math.PI);
 	}
-
-	public static function shake(magnitude:Int, duration:Float)
-	{
-		if (shakeTime < duration) shakeTime = duration;
-		shakeMagnitude = magnitude;
-	}
-
-	/**
-	 * Stop the screen from shaking immediately.
-	 */
-	public static function shakeStop()
-	{
-		shakeTime = 0;
-	}
-		
-	static function updateScreenShake():Void
-	{
-		if (shakeTime > 0)
-		{
-			var sx:Int = Std.random(shakeMagnitude * 2 + 1) - shakeMagnitude;
-			var sy:Int = Std.random(shakeMagnitude * 2 + 1) - shakeMagnitude;
-
-			state.camera.x += sx - shakeX;
-			state.camera.y += sy - shakeY;
-
-			shakeX = sx;
-			shakeY = sy;
-
-			shakeTime -= dt;
-			if (shakeTime < 0) shakeTime = 0;
-		}
-		else if (shakeX != 0 || shakeY != 0)
-		{
-			state.camera.x -= shakeX;
-			state.camera.y -= shakeY;
-			shakeX = shakeY = 0;
-		}
-	}
 	
 	public static function saveScreenshot(mimeType:String = 'image/png'):Void
 	{		
@@ -295,6 +255,6 @@ class Plm
 
 	inline static function get_camera():Camera
 	{
-		return state.camera;
+		return state.cameras[0];
 	}
 }

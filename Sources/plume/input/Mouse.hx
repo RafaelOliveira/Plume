@@ -34,12 +34,6 @@ class Mouse implements Input
 	/** delta of y */
 	public var dy(default, null):Int = 0;
 
-	/** x inside the world (adjusted with the camera) */
-	public var wx(default, null):Int = 0;
-
-	/** y inside the world (adjusted with the camera) */
-	public var wy(default, null):Int = 0;
-
 	public var durationMouseDown(default, null):Float = 0;
 
 	var mouseDownStartTime:Float;
@@ -135,19 +129,23 @@ class Mouse implements Input
 		this.x = Std.int(x / Plm.gameScale);
 		this.y = Std.int(y / Plm.gameScale);
 		this.dx = Std.int(dx / Plm.gameScale);
-		this.dy = Std.int(dy / Plm.gameScale);
-
-		if (Plm.state != null)
-		{
-			wx = Std.int((x + Plm.state.camera.x) / Plm.gameScale);
-			wy = Std.int((y + Plm.state.camera.y) / Plm.gameScale);
-		}
+		this.dy = Std.int(dy / Plm.gameScale);		
 	}
 
 	function onMouseWheel(delta:Int):Void
 	{
 		// TODO
 		trace("onMouseWheel : " + delta);
+	}
+
+	inline public function worldPosX(cameraIndex:Int):Int
+	{
+		return Std.int(x + Plm.state.cameras[cameraIndex].x);
+	}
+
+	inline public function worldPosY(cameraIndex:Int):Int
+	{
+		return Std.int(y + Plm.state.cameras[cameraIndex].y);
 	}
 
 	inline public function isPressed(index:Int = 0):Bool
