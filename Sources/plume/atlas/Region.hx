@@ -17,28 +17,47 @@ class Region
 	public var sy:Float;
 
 	/** Width of the region */
-	public var w:Int;
+	public var width:Int;
 
 	/** Height of the region */
-	public var h:Int;
+	public var height:Int;
 
-	public function new(image:Image, sx:Float, sy:Float, w:Int, h:Int)
+	public function new(image:Image, sx:Float, sy:Float, width:Int, height:Int)
 	{
 		this.image = image;
 		this.sx = sx;
 		this.sy = sy;
-		this.w = w;
-		this.h = h;
+		this.width = width;
+		this.height = height;
 	}
-
-	/** This is a simple render. To use things like flipping and scaling, use the class Sprite. */
+	 
 	inline public function render(g:Graphics, x:Float, y:Float):Void 
 	{
-		g.drawScaledSubImage(image, sx, sy, w, h, x, y, w, h);
+		g.drawScaledSubImage(image, sx, sy, width, height, x, y, width, height);
+	}
+
+	inline public function renderFlipX(g:Graphics, x:Float, y:Float):Void
+	{
+		g.drawScaledSubImage(image, sx, sy, width, height, x + width, y, -width, height);
+	}
+
+	inline public function renderFlipY(g:Graphics, x:Float, y:Float):Void
+	{
+		g.drawScaledSubImage(image, sx, sy, width, height, x, y + height, width, -height);
+	}
+
+	inline public function renderFlipXY(g:Graphics, x:Float, y:Float):Void
+	{
+		g.drawScaledSubImage(image, sx, sy, width, height, x + width, y + height, -width, -height);
 	}
 
 	public static function createFromImage(image:Image):Region
 	{
 		return new Region(image, 0, 0, image.width, image.height);
 	}
+
+	inline public static function get(regionName:String):Region
+	{
+		return Atlas.getRegion(regionName);
+	}	
 }

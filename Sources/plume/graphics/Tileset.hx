@@ -34,8 +34,8 @@ class Tileset
 		this.tileWidth = tileWidth;
 		this.tileHeight = tileHeight;
 
-		widthInTiles = Std.int(region.w / tileWidth);
-		heightInTiles = Std.int(region.h / tileHeight);
+		widthInTiles = Std.int(region.width / tileWidth);
+		heightInTiles = Std.int(region.height / tileHeight);
 	}
 
 	inline public function render(g:Graphics, index:Int, x:Float, y:Float):Void

@@ -140,12 +140,12 @@ class Mouse implements Input
 
 	inline public function worldPosX(cameraIndex:Int):Int
 	{
-		return Std.int(x + Plm.state.cameras[cameraIndex].x);
+		return Std.int(x + Plm.state.getCamera(cameraIndex).x);
 	}
 
 	inline public function worldPosY(cameraIndex:Int):Int
 	{
-		return Std.int(y + Plm.state.cameras[cameraIndex].y);
+		return Std.int(y + Plm.state.getCamera(cameraIndex).y);
 	}
 
 	inline public function isPressed(index:Int = 0):Bool

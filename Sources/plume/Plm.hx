@@ -20,7 +20,9 @@ class Plm
 	public static var windowWidth(default, null):Int;
 	public static var windowHeight(default, null):Int;
 	public static var gameWidth(default, null):Int;
-	public static var gameHeight(default, null):Int;	
+	public static var gameHeight(default, null):Int;
+
+	static var _isMobileValue:Int = -1;
 
 	public static function addState(state:State, name:String, go:Bool = false):Void
 	{
@@ -237,23 +239,28 @@ class Plm
 
 	public static function isMobile():Bool
 	{
-		#if js
-		var mobile = ['iphone', 'ipad', 'android', 'blackberry', 'nokia', 'opera mini', 'windows mobile', 'windows phone', 'iemobile'];
-
-		for (i in 0...mobile.length)
+		if (_isMobileValue == -1)
 		{
-			if (js.Browser.navigator.userAgent.toLowerCase().indexOf(mobile[i].toLowerCase()) > 0)
-				return true;
-		}
-		#elseif (sys_android || sys_android_native || sys_ios)
-		return true;		
-		#end
+			#if js
+			_isMobileValue = 0;
 
-		return false;
+			var mobile = ['iphone', 'ipad', 'android', 'blackberry', 'nokia', 'opera mini', 'windows mobile', 'windows phone', 'iemobile'];
+
+			for (i in 0...mobile.length)
+			{
+				if (js.Browser.navigator.userAgent.toLowerCase().indexOf(mobile[i].toLowerCase()) > 0)
+					_isMobileValue = 1;
+			}
+			#elseif (kha_android || kha_android_native || kha_ios)
+			_isMobileValue = 1;
+			#end
+		}		
+
+		return _isMobileValue == 1;
 	}
 
 	inline static function get_camera():Camera
 	{
-		return state.cameras[0];
+		return state.camera;
 	}
 }

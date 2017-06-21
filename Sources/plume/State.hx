@@ -3,14 +3,16 @@ package plume;
 import kha.graphics2.Graphics;
 
 @:allow(plume.Engine)
+@:allow(plume.Camera)
 class State
 {	
-	public var cameras:Array<Camera>;
+	/** The default camera **/
+	public var camera(get, null):Camera;
+
+	var cameras:Array<Camera>;
 
 	public var worldWidth:Int;
-    public var worldHeight:Int;
-
-	var isClippingCamera:Bool;	
+    public var worldHeight:Int;	
 
 	public function new():Void 
 	{
@@ -18,9 +20,7 @@ class State
 		cameras.push(new Camera(Plm.gameWidth, Plm.gameHeight));
 
 		worldWidth = Plm.gameWidth;
-        worldHeight = Plm.gameHeight;
-
-		isClippingCamera = false;
+        worldHeight = Plm.gameHeight;		
 	}
 
 	public function init():Void {}
@@ -35,16 +35,21 @@ class State
         this.worldHeight = height;        
     }
 
-	function addCamera(camera:Camera):Int
+	public function addCamera(camera:Camera):Int
 	{
 		cameras.push(camera);
 
 		return cameras.length - 1;
 	}
 
-	inline function removeCamera(cameraIndex:Int):Void
+	inline public function removeCamera(cameraIndex:Int):Void
 	{
 		cameras.splice(cameraIndex, 1);
+	}
+
+	inline public function getCamera(cameraIndex:Int):Camera
+	{
+		return cameras[cameraIndex];
 	}
 
 	@:noCompletion
@@ -52,29 +57,10 @@ class State
 	{
 		for (camera in cameras)
 			camera.update();
-	}
+	}	
 
-	public inline function beginCamera(g:Graphics, cameraIndex:Int, clip:Bool):Void
+	inline function get_camera():Camera
 	{
-		g.pushTranslation(-cameras[cameraIndex].x + cameras[cameraIndex].offsetX, 
-			-cameras[cameraIndex].y + cameras[cameraIndex].offsetY);
-
-		if (clip)
-		{
-			g.scissor(Std.int(cameras[cameraIndex].offsetX), Std.int(cameras[cameraIndex].offsetY), 
-				cameras[cameraIndex].width, cameras[cameraIndex].height);
-			isClippingCamera = true;
-		}
+		return cameras[0];
 	}
-
-	public inline function endCamera(g:Graphics):Void
-	{
-		g.popTransformation();
-
-		if (isClippingCamera)
-		{
-			g.disableScissor();
-			isClippingCamera = false;
-		}
-	}		
 }

@@ -57,7 +57,7 @@ class Sprite
 	
 	public function render(g:Graphics, x:Float, y:Float):Void 
 	{
-		g.drawScaledSubImage(region.image, region.sx, region.sy, region.w, region.h,
+		g.drawScaledSubImage(region.image, region.sx, region.sy, region.width, region.height,
 			x + (flip.x ? width : 0),
 			y + (flip.y ? height : 0), 
 			flip.x ? -width : width, flip.y ? -height : height);
@@ -71,8 +71,8 @@ class Sprite
 
 	public function applyScale():Void
 	{
-		width = Std.int(region.w * scaleX);
-		height = Std.int(region.h * scaleY);
+		width = Std.int(region.width * scaleX);
+		height = Std.int(region.height * scaleY);
 	}
 	
 	public function setFlip(flipX:Bool, flipY:Bool):Void
@@ -83,14 +83,14 @@ class Sprite
 		
 	function set_scaleX(value:Float):Float
 	{		
-		width = Std.int(region.w * value);
+		width = Std.int(region.width * value);
 		
 		return scaleX = value;
 	}	
 	
 	function set_scaleY(value:Float):Float
 	{
-		height = Std.int(region.h * value);
+		height = Std.int(region.height * value);
 		
 		return scaleY = value;
 	}

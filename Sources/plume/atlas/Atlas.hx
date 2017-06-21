@@ -111,8 +111,8 @@ class Atlas
 		}
 
 		var regions = new Array<Region>();
-        var cols = Std.int(reg.w / regionWidth);
-        var rows = Std.int(reg.h / regionHeight);
+        var cols = Std.int(reg.width / regionWidth);
+        var rows = Std.int(reg.height / regionHeight);
 
         for (r in 0...rows)
         {

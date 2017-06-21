@@ -7,13 +7,12 @@ import kha.Scheduler;
 import kha.Scaler;
 import kha.Image;
 import kha.graphics2.ImageScaleQuality;
-import kha.math.Vector2i;
 import plume.input.Input;
 import plume.input.Keyboard;
 import plume.input.Mouse;
 import plume.input.Touch;
 
-#if (js && !sys_debug_html5 && web_mobile)
+#if (js && !kha_debug_html5 && web_mobile)
 import plume.tools.WebMobile;
 #end
 
@@ -35,7 +34,7 @@ class EngineOptions
 	@:optional public var mouse:Null<Bool>;
 	@:optional public var touch:Null<Bool>;
 
-	#if (js && !sys_debug_html5 && web_mobile)
+	#if (js && !kha_debug_html5 && web_mobile)
 	@:optional public var warningState:State;
 	@:optional public var rightOrientation:Int;
 	#end
@@ -56,7 +55,7 @@ class Engine
 	static var canvasSizeBeforeFullscreen:Vector2i;	
 	#end
 
-	#if (js && !sys_debug_html5 && web_mobile)
+	#if (js && !kha_debug_html5 && web_mobile)
 	var webMobile:WebMobile;
 	#end	
 
@@ -89,12 +88,12 @@ class Engine
 			if (options.touch != null && options.touch == true)
 				inputs.push(Touch.get());
 
-			#if (js && !sys_debug_html5 && web_mobile)
-			if (options.warningState != null && options.rightOrientation != null)
+			#if (js && !kha_debug_html5 && web_mobile)
+			if (options.warningState != null && options.rightOrientation != null && Plm.isMobile())
 				webMobile = new WebMobile(options.warningState, options.rightOrientation);
 			#end
 		}
-		else	
+		else
 			highQualityScale = false;		
 				
 		currTime = Scheduler.time();
@@ -108,7 +107,7 @@ class Engine
 		else
 			System.notifyOnRender(renderWithFramebuffer);
 
-		#if (js && !sys_debug_html5 && web_mobile)
+		#if (js && !kha_debug_html5 && web_mobile)
 		if (webMobile != null)
 			Scheduler.addTimeTask(updateWebMobile, 0, 1 / fps);
 		else
@@ -141,7 +140,7 @@ class Engine
 		updateState();
 	}
 
-	#if (js && !sys_debug_html5 && web_mobile)
+	#if (js && !kha_debug_html5 && web_mobile)
 	function updateWebMobile()
 	{
 		updateDeltaTime();

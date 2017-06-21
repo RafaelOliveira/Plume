@@ -1,5 +1,7 @@
 package plume;
 
+import kha.graphics2.Graphics;
+
 @:allow(plume.State)
 class Camera
 {
@@ -90,13 +92,13 @@ class Camera
     {
         if (x < 0)
             x = 0;
-        else if (x + width > Plm.state.worldWidth)
-            x = Plm.state.worldWidth - width;
+        else if (x + width - offsetX > Plm.state.worldWidth)
+            x = Plm.state.worldWidth - width + offsetX;
         
         if (y < 0)
             y = 0;
-        else if (y + height > Plm.state.worldHeight)
-            y = Plm.state.worldHeight - height;
+        else if (y + height - offsetY > Plm.state.worldHeight)
+            y = Plm.state.worldHeight - height + offsetY;
     }
     
     public function moveBy(stepX:Float, stepY:Float):Void
@@ -169,6 +171,22 @@ class Camera
 			y -= shakeY;
 			shakeX = shakeY = 0;
 		}
+	}
+
+    public function begin(g:Graphics):Void
+	{
+		g.pushTranslation(-x + offsetX,	-y + offsetY);
+
+		if (Plm.state.cameras.length > 1)		
+			g.scissor(Std.int(offsetX), Std.int(offsetY), width, height);
+	}
+
+	public inline function end(g:Graphics):Void
+	{
+		g.popTransformation();
+		 
+		if (Plm.state.cameras.length > 1)		
+			g.disableScissor();
 	}
 
     inline function get_viewPortX():Float
