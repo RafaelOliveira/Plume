@@ -13,6 +13,28 @@ class Body
 	public var collidable:Bool;
 	public var type:Int = HITBOX;
 
+	/**
+	 * When you collide with an Body on the x-axis with moveTo() or moveBy()
+	 * the engine call this function. Override it to detect and change the
+	 * behaviour of collisions.
+	 *
+	 * @param	e	The Body you collided with.
+	 *
+	 * @return	If there was a collision.
+	 */
+	public var moveCollideX:Body->Bool;
+
+	/**
+	 * When you collide with an Body on the y-axis with moveTo() or moveBy()
+	 * the engine call this function. Override it to detect and change the
+	 * behaviour of collisions.
+	 *
+	 * @param	e	The Body you collided with.
+	 *
+	 * @return	If there was a collision.
+	 */
+	public var moveCollideY:Body->Bool;
+
 	// Collision information	
 	var _moveX:Float;
 	var _moveY:Float;
@@ -22,6 +44,9 @@ class Body
 		this.pos = pos;
 		this.rect = rect;
 		collidable = true;
+
+		moveCollideX = moveCollideXDefault;
+		moveCollideY = moveCollideYDefault;
 	}
 
 	/**
@@ -226,30 +251,13 @@ class Body
 		moveBy(point.x, point.y, list, sweep);
 	}
 
-	/**
-	 * When you collide with an Body on the x-axis with moveTo() or moveBy()
-	 * the engine call this function. Override it to detect and change the
-	 * behaviour of collisions.
-	 *
-	 * @param	e	The Body you collided with.
-	 *
-	 * @return	If there was a collision.
-	 */
-	public function moveCollideX(body:Body):Bool
+	
+	function moveCollideXDefault(body:Body):Bool
 	{
 		return true;
 	}
-
-	/**
-	 * When you collide with an Body on the y-axis with moveTo() or moveBy()
-	 * the engine call this function. Override it to detect and change the
-	 * behaviour of collisions.
-	 *
-	 * @param	e	The Body you collided with.
-	 *
-	 * @return	If there was a collision.
-	 */
-	public function moveCollideY(body:Body):Bool
+	
+	function moveCollideYDefault(body:Body):Bool
 	{
 		return true;
 	}

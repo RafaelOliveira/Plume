@@ -27,6 +27,10 @@ class SpriteAnim
 {
 	var region:Region;
 
+	public var width(get, null):Int;
+	
+	public var height(get, null):Int;
+
 	var active:Bool;
 
 	/**
@@ -218,9 +222,19 @@ class SpriteAnim
 
 	public function render(g:Graphics, x:Float, y:Float):Void 
 	{
-		g.drawScaledSubImage(region.image, region.sx, region.sy, region.w, region.h,
-			x + (flip.x ? region.w : 0),
-			y + (flip.y ? region.h : 0), 
-			flip.x ? -region.w : region.w, flip.y ? -region.h : region.h);
+		g.drawScaledSubImage(region.image, region.sx, region.sy, region.width, region.height,
+			x + (flip.x ? region.width : 0),
+			y + (flip.y ? region.height : 0), 
+			flip.x ? -region.width : region.width, flip.y ? -region.height : region.height);
+	}
+
+	inline function get_width():Int
+	{
+		return region.width;
+	}
+
+	inline function get_height():Int
+	{
+		return region.height;
 	}
 }

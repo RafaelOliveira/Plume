@@ -101,8 +101,9 @@ class Grid extends Body
 	{
 		data = new Array<Array<Tile>>();
 
+		this.columns = columns;
 		this.rows = rows;
-		this.columns = columns;		
+		rect = new Rectangle(0, 0, columns * tileWidth, rows * tileHeight);
 		
 		for (y in 0...rows)
 		{

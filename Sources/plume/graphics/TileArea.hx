@@ -5,6 +5,10 @@ import plume.atlas.Region;
 import plume.atlas.Atlas;
 import plume.atlas.Atlas.ImageType;
 
+/**
+ * This class render a graphic repeatedly inside an area
+ * but will not cut the graphic if is rendering outside the limits
+**/
 class TileArea
 {
 	public var region:Region;
@@ -27,9 +31,6 @@ class TileArea
 
 	public function render(g:Graphics, x:Float, y:Float, width:Int, height:Int):Void
 	{
-		//width += Std.int(x);
-		//height += Std.int(y);
-
 		sx = x;
 
 		while(y < height)
@@ -37,11 +38,11 @@ class TileArea
 			while (x < width)
 			{
 				g.drawScaledSubImage(region.image, region.sx, region.sy,
-									 region.w, region.h, x, y, region.w, region.h);
-				x += region.w;
+									 region.width, region.height, x, y, region.width, region.height);
+				x += region.width;
 			}
 
-			y += region.h;
+			y += region.height;
 			x = sx;
 		}
 	}
