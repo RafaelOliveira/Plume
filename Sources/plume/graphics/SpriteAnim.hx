@@ -25,14 +25,33 @@ class AnimData
 
 class SpriteAnim
 {
-	var region:Region;
-
-	public var width(get, null):Int;
-	
-	public var height(get, null):Int;
+	/**
+	 * The internal sprite, 
+	 * used to scale and flip the rendering
+	*/
+	var sprite:Sprite;
+	/**
+	 * The width that will rendered. Change only after play the first animation.
+	 * Before that the sprite doesn't has a graphic (the internal sprite is null).
+	 */
+	public var width(get, set):Int;
+	/**
+	 * The height that will be rendered. Change only after play the first animation.
+	 * Before that the sprite doesn't has a graphic (the internal sprite is null).
+	 */
+	public var height(get, set):Int;
+	/**
+	 * If the sprite should be rendered flipped in x. Change only after play the first animation.
+	 * Before that the sprite doesn't has a graphic (the internal sprite is null).
+	 */
+	public var flipX(get, set):Bool;
+	/**
+	 * If the sprite should be rendered flipped in y. Change only after play the first animation.
+	 * Before that the sprite doesn't has a graphic (the internal sprite is null).
+	 */
+	public var flipY(get, set):Bool;
 
 	var active:Bool;
-
 	/**
 	 * positive = forward, negative = backwards 
 	 */
@@ -52,11 +71,7 @@ class SpriteAnim
 	/** 
 	 * The name of the current animation 
 	 */
-	public var nameAnim(default, null):String;
-	/**
-	 * If the sprite should be rendered flipped
-	 */
-	public var flip:Vector2b;
+	public var nameAnim(default, null):String;	
 	
 	public function new():Void
 	{
@@ -66,8 +81,7 @@ class SpriteAnim
 		loop = false;
 		autoReverse = false;
 		elapsed = 0;
-		nameAnim = '';
-		flip = new Vector2b();
+		nameAnim = '';		
 		
 		animations = new Map<String, AnimData>();
 	}
@@ -127,7 +141,7 @@ class SpriteAnim
 		}
 
 		// update region
-		region = currAnimation.regions[currIndex];		
+		sprite.region = currAnimation.regions[currIndex];		
 	}
 	
 	public function destroy():Void
@@ -168,7 +182,10 @@ class SpriteAnim
 
 			restart(index);
 
-			region = currAnimation.regions[currIndex];
+			if (sprite == null)
+				sprite = new Sprite(currAnimation.regions[currIndex]);
+			else
+				sprite.region = currAnimation.regions[currIndex];
 		}
 		else
 		{
@@ -220,21 +237,56 @@ class SpriteAnim
 		direction *= -1;		
 	}
 
-	public function render(g:Graphics, x:Float, y:Float):Void 
+	inline public function render(g:Graphics, x:Float, y:Float):Void 
 	{
-		g.drawScaledSubImage(region.image, region.sx, region.sy, region.width, region.height,
-			x + (flip.x ? region.width : 0),
-			y + (flip.y ? region.height : 0), 
-			flip.x ? -region.width : region.width, flip.y ? -region.height : region.height);
+		sprite.render(g, x, y);
 	}
 
 	inline function get_width():Int
 	{
-		return region.width;
+		return sprite.width;
+	}
+
+	inline function set_width(value:Int):Int
+	{
+		sprite.width = value;
+
+		return value;
 	}
 
 	inline function get_height():Int
 	{
-		return region.height;
+		return sprite.height;
+	}
+
+	inline function set_height(value:Int):Int
+	{
+		sprite.height = value;
+
+		return value;
+	}
+
+	inline function get_flipX():Bool
+	{
+		return sprite.flipX;
+	}
+
+	inline function set_flipX(value:Bool):Bool
+	{
+		sprite.flipX = value;
+
+		return value;
+	}
+
+	inline function get_flipY():Bool
+	{
+		return sprite.flipY;
+	}
+
+	inline function set_flipY(value:Bool):Bool
+	{
+		sprite.flipY = value;
+
+		return value;
 	}
 }

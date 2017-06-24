@@ -1,12 +1,10 @@
 package plume.graphics;
 
-import kha.Image;
 import kha.graphics2.Graphics;
-import kha.math.Vector2i;
-import plume.math.Vector2b;
 import plume.atlas.Atlas;
 import plume.atlas.Region;
 import plume.atlas.Atlas.ImageType;
+import plume.Plm;
 
 class Sprite
 {	
@@ -15,25 +13,30 @@ class Sprite
 	 */
 	public var region:Region;
 	/**
-	 * The width of the region scaled with scaleX
+	 * The width that will rendered
 	 */
-	public var width(default, null):Int;
+	public var width(get, set):Int;
 	/**
-	 * The height of the region scaled with scaleY
+	 * The height that will be rendered
 	 */
-	public var height(default, null):Int;
+	public var height(get, set):Int;
 	/**
-	 * A scale in x to render the region
+	 * If the sprite should be rendered flipped in x
 	 */
-	public var scaleX(default, set):Float;	
+	public var flipX(get, set):Bool;
 	/**
-	 * A scale in y to render the region
+	 * If the sprite should be rendered flipped in y
 	 */
-	public var scaleY(default, set):Float;
-	/**
-	 * If the sprite should be rendered flipped
-	 */
-	public var flip:Vector2b;	
+	public var flipY(get, set):Bool;
+
+	var _fx:Bool;
+	var _fy:Bool;
+
+	var _dx:Float;
+	var _dy:Float;
+
+	var _dw:Int;
+	var _dh:Int;
 	
 	public function new(source:ImageType):Void
 	{		
@@ -47,51 +50,127 @@ class Sprite
 
 			case Third(regionName):
 				this.region = Atlas.getRegion(regionName); 
-		}
+		}		
 		
-		scaleX = 1;
-		scaleY = 1;
-		
-		flip = new Vector2b();
+		_fx = false;
+		_fy = false;
+
+		_dx = 0;
+		_dy = 0;
+
+		_dw = region.width;
+		_dh = region.height;
 	}
 	
 	public function render(g:Graphics, x:Float, y:Float):Void 
 	{
 		g.drawScaledSubImage(region.image, region.sx, region.sy, region.width, region.height,
-			x + (flip.x ? width : 0),
-			y + (flip.y ? height : 0), 
-			flip.x ? -width : width, flip.y ? -height : height);
+			x + _dx, y + _dy, _dw, _dh);
 	}
 	
-	public function setScale(value:Float):Void
+	/**
+	 * Sets the width and height based in a scale
+	*/
+	public function setScale(scaleX:Float, scaleY:Float):Void
 	{
-		scaleX = value;
-		scaleY = value;
+		_dw = Std.int(_dw * scaleX);
+		_dh = Std.int(_dh * scaleY);
 	}
 
-	public function applyScale():Void
-	{
-		width = Std.int(region.width * scaleX);
-		height = Std.int(region.height * scaleY);
-	}
-	
+	/**
+	 * Sets flipX and flipY together
+	*/
 	public function setFlip(flipX:Bool, flipY:Bool):Void
 	{
-		flip.x = flipX;
-		flip.y = flipY;
-	}	
-		
-	function set_scaleX(value:Float):Float
-	{		
-		width = Std.int(region.width * value);
-		
-		return scaleX = value;
-	}	
-	
-	function set_scaleY(value:Float):Float
+		this.flipX = flipX;
+		this.flipY = flipY;
+	}
+
+	/**
+	 * Reset the width to the original width
+	*/
+	inline public function resetWidth():Void
 	{
-		height = Std.int(region.height * value);
-		
-		return scaleY = value;
+		width = region.width;		
+	}
+
+	/**
+	 * Reset the height to the original height
+	*/
+	inline public function resetHeight():Void
+	{
+		height = region.height;
+	}
+
+	inline function get_width():Int
+	{
+		return _dw;
+	}
+	
+	inline function set_width(value:Int):Int
+	{
+		_dw = value;
+		flipX = _fx;
+
+		return value;
+	}
+
+	inline function get_height():Int
+	{
+		return _dh;
+	}
+
+	inline function set_height(value:Int):Int
+	{
+		_dh = value;
+		flipY = _fy;
+
+		return value;
+	}
+
+	inline function get_flipX():Bool
+	{
+		return _fx;
+	}	
+
+	function set_flipX(value:Bool):Bool
+	{
+		if (value)
+		{
+			_dx = Plm.iabs(_dw);
+			
+			if (_dw > 0)
+				_dw = -_dw;
+		}
+		else
+		{
+			_dx = 0;
+			_dw = Plm.iabs(_dw);
+		}
+
+		return (_fx = value);
+	}
+
+	inline function get_flipY():Bool
+	{
+		return _fy;
+	}
+
+	function set_flipY(value:Bool):Bool
+	{
+		if (value)
+		{
+			_dy = Plm.iabs(_dh);
+			
+			if (_dh > 0)
+				_dh = -_dh;
+		}
+		else
+		{
+			_dy = 0;
+			_dh = Plm.iabs(_dh);
+		}
+
+		return (_fy = value);
 	}
 }

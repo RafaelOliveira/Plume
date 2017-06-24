@@ -20,7 +20,7 @@ class Region
 	public var width:Int;
 
 	/** Height of the region */
-	public var height:Int;
+	public var height:Int;	
 
 	public function new(image:Image, sx:Float, sy:Float, width:Int, height:Int)
 	{
@@ -34,22 +34,7 @@ class Region
 	inline public function render(g:Graphics, x:Float, y:Float):Void 
 	{
 		g.drawScaledSubImage(image, sx, sy, width, height, x, y, width, height);
-	}
-
-	inline public function renderFlipX(g:Graphics, x:Float, y:Float):Void
-	{
-		g.drawScaledSubImage(image, sx, sy, width, height, x + width, y, -width, height);
-	}
-
-	inline public function renderFlipY(g:Graphics, x:Float, y:Float):Void
-	{
-		g.drawScaledSubImage(image, sx, sy, width, height, x, y + height, width, -height);
-	}
-
-	inline public function renderFlipXY(g:Graphics, x:Float, y:Float):Void
-	{
-		g.drawScaledSubImage(image, sx, sy, width, height, x + width, y + height, -width, -height);
-	}
+	}		
 
 	public static function createFromImage(image:Image):Region
 	{

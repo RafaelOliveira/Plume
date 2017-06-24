@@ -198,6 +198,11 @@ class Plm
 	{
 		return value * (180 / Math.PI);
 	}
+
+	public inline static function iabs(value:Int):Int
+	{
+		return (value < 0 ? -value : value);		
+	}
 	
 	public static function saveScreenshot(mimeType:String = 'image/png'):Void
 	{		
