@@ -29,7 +29,7 @@ class SpriteAnim
 	 * The internal sprite, 
 	 * used to scale and flip the rendering
 	*/
-	var sprite:Sprite;
+	public var sprite:Sprite;
 	/**
 	 * The width that will rendered. Change only after play the first animation.
 	 * Before that the sprite doesn't has a graphic (the internal sprite is null).
