@@ -15,11 +15,11 @@ class Sprite
 	/**
 	 * The width that will rendered
 	 */
-	public var width(get, set):Int;
+	public var width(default, set):Int;
 	/**
 	 * The height that will be rendered
 	 */
-	public var height(get, set):Int;
+	public var height(default, set):Int;
 	/**
 	 * If the sprite should be rendered flipped in x
 	 */
@@ -27,7 +27,7 @@ class Sprite
 	/**
 	 * If the sprite should be rendered flipped in y
 	 */
-	public var flipY(get, set):Bool;
+	public var flipY(get, set):Bool;	
 
 	var _fx:Bool;
 	var _fy:Bool;
@@ -50,16 +50,13 @@ class Sprite
 
 			case Third(regionName):
 				this.region = Atlas.getRegion(regionName); 
-		}		
-		
+		}
+
 		_fx = false;
 		_fy = false;
-
-		_dx = 0;
-		_dy = 0;
-
-		_dw = region.width;
-		_dh = region.height;
+		
+		width = region.width;
+		height = region.height;
 	}
 	
 	public function render(g:Graphics, x:Float, y:Float):Void 
@@ -73,8 +70,8 @@ class Sprite
 	*/
 	public function setScale(scaleX:Float, scaleY:Float):Void
 	{
-		_dw = Std.int(_dw * scaleX);
-		_dh = Std.int(_dh * scaleY);
+		width = Std.int(width * scaleX);
+		height = Std.int(height * scaleY);
 	}
 
 	/**
@@ -100,29 +97,19 @@ class Sprite
 	inline public function resetHeight():Void
 	{
 		height = region.height;
-	}
-
-	inline function get_width():Int
-	{
-		return _dw;
-	}
+	}	
 	
 	inline function set_width(value:Int):Int
 	{
-		_dw = value;
+		width = value;
 		flipX = _fx;
 
 		return value;
-	}
-
-	inline function get_height():Int
-	{
-		return _dh;
-	}
+	}	
 
 	inline function set_height(value:Int):Int
 	{
-		_dh = value;
+		height = value;
 		flipY = _fy;
 
 		return value;
@@ -137,15 +124,13 @@ class Sprite
 	{
 		if (value)
 		{
-			_dx = Plm.iabs(_dw);
-			
-			if (_dw > 0)
-				_dw = -_dw;
+			_dx = width;
+			_dw = -width;				
 		}
 		else
 		{
 			_dx = 0;
-			_dw = Plm.iabs(_dw);
+			_dw = width;
 		}
 
 		return (_fx = value);
@@ -160,15 +145,13 @@ class Sprite
 	{
 		if (value)
 		{
-			_dy = Plm.iabs(_dh);
-			
-			if (_dh > 0)
-				_dh = -_dh;
+			_dy = height;
+			_dh = -height;
 		}
 		else
 		{
 			_dy = 0;
-			_dh = Plm.iabs(_dh);
+			_dh = height;
 		}
 
 		return (_fy = value);

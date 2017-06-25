@@ -173,6 +173,11 @@ class Mouse implements Input
 		return mouseJustPressed;
 	}
 
+	inline public function inRect(x:Float, y:Float, w:Int, h:Int):Bool
+	{
+		return Plm.pointInside(this.x, this.y, x, y, w, h);
+	}
+
 	inline public function isPressedRect(index:Int, x:Float, y:Float, w:Int, h:Int):Bool
 	{
 		return mousePressed[index] && Plm.pointInside(this.x, this.y, x, y, w, h);
