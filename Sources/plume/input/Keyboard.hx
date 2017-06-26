@@ -1,12 +1,13 @@
 package plume.input;
 
 import kha.input.Keyboard as KhaKeyboard;
+import kha.input.KeyCode;
 
 class Keyboard implements Input
 {
-	var keysPressed:Map<Int, Bool>;
-	var keysDown:Map<Int, Bool>;
-	var keysUp:Map<Int, Bool>;
+	var keysPressed:Map<KeyCode, Bool>;
+	var keysDown:Map<KeyCode, Bool>;
+	var keysUp:Map<KeyCode, Bool>;
 	var keyCount:Int = 0;
 	var keysJustPressed:Bool;
 
@@ -16,9 +17,9 @@ class Keyboard implements Input
 	{
 		KhaKeyboard.get(0).notify(onKeyDown, onUpKey);
 
-		keysPressed = new Map<Int, Bool>();
-		keysDown = new Map<Int, Bool>();
-		keysUp = new Map<Int, Bool>();
+		keysPressed = new Map<KeyCode, Bool>();
+		keysDown = new Map<KeyCode, Bool>();
+		keysUp = new Map<KeyCode, Bool>();
 		keysJustPressed = false;
 	}
 
@@ -30,7 +31,7 @@ class Keyboard implements Input
 		return instance;
 	}
 
-	function onKeyDown(key:Int):Void
+	function onKeyDown(key:KeyCode):Void
 	{
 		keysPressed.set(key, true);
 		keysDown.set(key, true);
@@ -39,7 +40,7 @@ class Keyboard implements Input
 		keysJustPressed = true;
 	}
 
-	function onUpKey(key:Int):Void
+	function onUpKey(key:KeyCode):Void
 	{
 		keysUp.set(key, true);
 		keysDown.set(key, false);
@@ -59,17 +60,17 @@ class Keyboard implements Input
 		keysJustPressed = false;
 	}
 
-	inline public function isDown(key:Int):Bool
+	inline public function isDown(key:KeyCode):Bool
 	{
 		return keysDown.get(key);
 	}
 
-	inline public function isUp(key:Int):Bool
+	inline public function isUp(key:KeyCode):Bool
 	{
 		return keysUp.exists(key);
 	}
 
-	inline public function isPressed(key:Int):Bool
+	inline public function isPressed(key:KeyCode):Bool
 	{
 		return keysPressed.exists(key);
 	}

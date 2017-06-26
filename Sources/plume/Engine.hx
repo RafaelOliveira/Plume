@@ -67,6 +67,8 @@ class Engine
 
 		var fps:Int = 60;
 
+		inputs = new Array<Input>();
+
 		if (options != null)
 		{
 			highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;
@@ -75,9 +77,7 @@ class Engine
 				backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
 
 			if (options.fps != null)
-				fps = options.fps;
-
-			inputs = new Array<Input>();
+				fps = options.fps;			
 
 			if (options.keyboard != null && options.keyboard == true)
 				inputs.push(Keyboard.get());
