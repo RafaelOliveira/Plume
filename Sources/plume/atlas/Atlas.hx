@@ -231,4 +231,21 @@ class Atlas
 			cache.set(dataItem[0], region);
 		}
 	}
+
+	public static function createRegionsFromSimpleAtlas(image:Image, data:Blob):Map<String, Region>
+	{
+		var regions = new Map<String, Region>();
+
+		var dataString = StringTools.trim(data.toString());
+		var lines = dataString.split('\n');
+
+		for (line in lines)
+		{
+			var dataItem = line.split(';');
+			var region = new Region(image, Std.parseInt(dataItem[1]), Std.parseInt(dataItem[2]), Std.parseInt(dataItem[3]), Std.parseInt(dataItem[4]));
+			regions.set(dataItem[0], region);
+		}
+
+		return regions;
+	}
 }

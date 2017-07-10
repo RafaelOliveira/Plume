@@ -67,17 +67,30 @@ class Engine
 
 		var fps:Int = 60;
 
-		inputs = new Array<Input>();
+		inputs = new Array<Input>();		
 
 		if (options != null)
 		{
 			highQualityScale = options.highQualityScale != null ? options.highQualityScale : false;
 
+			#if (js && !kha_debug_html5 && web_mobile)
+			if (options.warningState != null && options.rightOrientation != null && Plm.isMobile())
+			{
+				if (options.bbWidth != null && options.bbHeight != null)
+				{
+					webMobile = new WebMobile(options.warningState, options.rightOrientation, options.bbWidth, options.bbHeight);
+					backbuffer = Image.createRenderTarget(webMobile.bbWidth, webMobile.bbHeight);
+				}
+				else
+					webMobile = new WebMobile(options.warningState, options.rightOrientation, 0, 0);
+			}
+			#else
 			if (options.bbWidth != null && options.bbHeight != null)
 				backbuffer = Image.createRenderTarget(options.bbWidth, options.bbHeight);
+			#end
 
 			if (options.fps != null)
-				fps = options.fps;			
+				fps = options.fps;
 
 			if (options.keyboard != null && options.keyboard == true)
 				inputs.push(Keyboard.get());
@@ -86,19 +99,14 @@ class Engine
 				inputs.push(Mouse.get());
 
 			if (options.touch != null && options.touch == true)
-				inputs.push(Touch.get());
-
-			#if (js && !kha_debug_html5 && web_mobile)
-			if (options.warningState != null && options.rightOrientation != null && Plm.isMobile())
-				webMobile = new WebMobile(options.warningState, options.rightOrientation);
-			#end
+				inputs.push(Touch.get());			
 		}
 		else
-			highQualityScale = false;		
+			highQualityScale = false;
 				
 		currTime = Scheduler.time();
 
-		Plm.stateList = new Map<String, State>();
+		Plm.stateList = new Map<String, State>();		
 			
 		setupGameWindow();		
 			
@@ -130,6 +138,9 @@ class Engine
 			Plm.gameWidth = Plm.windowWidth;
 			Plm.gameHeight = Plm.windowHeight;
 		}
+
+		Plm.centerX = Std.int(Plm.gameWidth * 0.5);
+		Plm.centerY = Std.int(Plm.gameHeight * 0.5);
 
 		Plm.gameScale = Plm.windowWidth / Plm.gameWidth;
 	}
@@ -233,6 +244,19 @@ class Engine
 
 		return size;
 	}
+
+	public static function getScreenSizeAspectRatioFixed(baseWidth:Int, baseHeight:Int):Vector2i
+	{
+		var windowWidth = System.windowWidth();
+		var windowHeight = System.windowHeight();		
+		
+		var ratioX = windowWidth / baseWidth;
+		var ratioY = windowHeight / baseHeight;
+		
+		var scaleFactor = Math.min(ratioX, ratioY);
+		
+		return new Vector2i(Std.int(Math.ceil(windowWidth / scaleFactor)), Std.int(Math.ceil(windowHeight / scaleFactor)));		
+	}
 	
 	public static function requestFullScreen():Void
 	{
@@ -295,6 +319,17 @@ class Engine
 			Plm.gameWidth = Plm.windowWidth;
 			Plm.gameHeight = Plm.windowHeight;
 		}
+		#if (js && !kha_debug_html5 && web_mobile)
+		else
+		{
+			instance.backbuffer = Image.createRenderTarget(instance.webMobile.bbWidth, instance.webMobile.bbHeight);
+			Plm.gameWidth = instance.backbuffer.width;
+			Plm.gameHeight = instance.backbuffer.height;
+		}
+		#end
+
+		Plm.centerX = Std.int(Plm.gameWidth * 0.5);
+		Plm.centerY = Std.int(Plm.gameHeight * 0.5);
 		
 		Plm.gameScale = Plm.windowWidth / Plm.gameWidth;
 
